@@ -9,13 +9,13 @@
 <title>ReceiptScan</title>
 <style>
   :root {
-    --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#252525;
-    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
-    --text:#f0ede8; --text2:#9a9690; --text3:#5a5754;
-    --accent:#e8d5a3; --accent-bg:rgba(232,213,163,0.1);
-    --green:#7ecfa4; --green-bg:rgba(126,207,164,0.1);
-    --red:#e07070;
-    --r:14px; --rs:8px;
+    --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#252525;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+    --text:#f0ede8;--text2:#9a9690;--text3:#5a5754;
+    --accent:#e8d5a3;--accent-bg:rgba(232,213,163,0.1);
+    --green:#7ecfa4;--green-bg:rgba(126,207,164,0.1);
+    --red:#e07070;--blue:#7eb8e0;
+    --r:14px;--rs:8px;
     --font:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -30,9 +30,26 @@
   .btn-primary{background:var(--accent);color:#1a1600}
   .btn-secondary{background:var(--surface2);color:var(--text);border:.5px solid var(--border2)}
   .btn-ghost{background:transparent;color:var(--text2)}
+  .btn-danger{background:rgba(224,112,112,0.12);color:var(--red);border:.5px solid rgba(224,112,112,0.3)}
   .btn:disabled{opacity:.35;pointer-events:none}
   .btn-sm{padding:10px 16px;font-size:14px;border-radius:var(--rs)}
   .btn-icon{width:40px;height:40px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface2);border:.5px solid var(--border2);font-size:17px}
+
+  /* TRIP BANNER */
+  .trip-banner{
+    margin:0 20px 4px;padding:12px 16px;
+    background:var(--accent-bg);border-radius:var(--r);
+    border:.5px solid rgba(232,213,163,0.25);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    flex-shrink:0;cursor:pointer;
+  }
+  .trip-banner.no-trip{background:var(--surface);border-color:var(--border2)}
+  .trip-banner-left{display:flex;align-items:center;gap:10px;min-width:0}
+  .trip-icon{font-size:18px;flex-shrink:0}
+  .trip-name{font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trip-name.none{color:var(--text3);font-weight:400}
+  .trip-label{font-size:11px;color:var(--text3);margin-top:1px}
+  .trip-change{font-size:12px;color:var(--text3);flex-shrink:0}
 
   /* SCAN */
   #scan-screen{background:var(--bg)}
@@ -69,11 +86,29 @@
   .up-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px}
   .up-icon.loading{background:var(--accent-bg);border:1px solid rgba(232,213,163,.2);animation:pulse 1.4s ease-in-out infinite}
   .up-icon.success{background:var(--green-bg);border:1px solid rgba(126,207,164,.25)}
-  .up-icon.error  {background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.25)}
+  .up-icon.error{background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.25)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .up-title{font-size:22px;font-weight:700;text-align:center;letter-spacing:-.3px}
   .up-sub{font-size:14px;color:var(--text2);text-align:center;max-width:280px;line-height:1.5}
   .up-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
+
+  /* TRIPS SCREEN */
+  #trips-screen{background:var(--bg)}
+  .trips-body{flex:1;overflow-y:auto;padding:0 20px 20px}
+  .new-trip-box{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden;margin-bottom:16px}
+  .new-trip-input-row{display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:.5px solid var(--border)}
+  .new-trip-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);flex:1;outline:none;-webkit-appearance:none}
+  .new-trip-input::placeholder{color:var(--text3)}
+  .trips-section-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px}
+  .trip-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:.5px solid var(--border);cursor:pointer}
+  .trip-item:last-child{border-bottom:none}
+  .trip-item-icon{width:42px;height:42px;border-radius:10px;background:var(--accent-bg);border:.5px solid rgba(232,213,163,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .trip-item-icon.active-trip{background:var(--accent);font-size:18px}
+  .trip-item-info{flex:1;min-width:0}
+  .trip-item-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trip-item-meta{font-size:12px;color:var(--text2);margin-top:2px}
+  .trip-item-check{font-size:18px;color:var(--accent);flex-shrink:0}
+  .no-trips{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 20px;color:var(--text3);font-size:14px;text-align:center}
 
   /* HISTORY */
   #history-screen{background:var(--bg)}
@@ -133,11 +168,12 @@
     <div class="field">
       <div class="field-lbl">Google Client ID</div>
       <input class="field-inp" type="text" id="inp-client" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off" autocorrect="off" spellcheck="false">
-      <div class="field-hint">Get this at console.cloud.google.com → APIs &amp; Services → Credentials → OAuth 2.0 Client ID (Web application). Add this page's URL as an Authorized Redirect URI.</div>
+      <div class="field-hint">Get this at console.cloud.google.com → APIs &amp; Services → Credentials</div>
     </div>
     <div class="field">
-      <div class="field-lbl">Folder Name in Google Drive</div>
+      <div class="field-lbl">Main Folder Name in Google Drive</div>
       <input class="field-inp" type="text" id="inp-folder" placeholder="Receipts">
+      <div class="field-hint">Trip receipts will be saved as subfolders inside this folder</div>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeSetup()">Cancel</button>
@@ -150,11 +186,11 @@
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive folder.</div>
+  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Photograph or pick receipt images</div>
-    <div class="perm-row"><span style="font-size:18px">✏️</span> Enter vendor, date, amount &amp; category</div>
-    <div class="perm-row"><span style="font-size:18px">📁</span> Uploads the image to Google Drive</div>
+    <div class="perm-row"><span style="font-size:18px">✈️</span> Organize receipts by business trip</div>
+    <div class="perm-row"><span style="font-size:18px">📁</span> Uploads images to Google Drive</div>
     <div class="perm-row"><span style="font-size:18px">🔒</span> Only your Google account is accessed</div>
   </div>
   <div class="auth-acts">
@@ -168,10 +204,22 @@
   <div class="topbar">
     <div>
       <div class="topbar-title">🧾 ReceiptScan</div>
-      <div class="topbar-sub" id="folder-label">Saving to: Receipts</div>
     </div>
     <button class="btn btn-icon" onclick="openSetup()">⚙️</button>
   </div>
+
+  <!-- Active trip banner -->
+  <div class="trip-banner no-trip" id="trip-banner" onclick="showTab('trips')">
+    <div class="trip-banner-left">
+      <span class="trip-icon">✈️</span>
+      <div>
+        <div class="trip-name none" id="banner-name">No active trip</div>
+        <div class="trip-label" id="banner-label">Tap to select or create a trip</div>
+      </div>
+    </div>
+    <span class="trip-change">Change →</span>
+  </div>
+
   <div class="scan-body">
     <div class="camera-zone" id="camera-zone" onclick="triggerPhoto()">
       <div class="corner c-tl"></div>
@@ -218,11 +266,70 @@
     <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
   </div>
   <div class="tabbar">
-    <button class="tab active" onclick="showTab('scan')">
+    <button class="tab active" id="t-scan" onclick="showTab('scan')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
       Scan
     </button>
-    <button class="tab" onclick="showTab('history')">
+    <button class="tab" id="t-trips" onclick="showTab('trips')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Trips
+    </button>
+    <button class="tab" id="t-history" onclick="showTab('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<!-- TRIPS SCREEN -->
+<div class="screen" id="trips-screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">✈️ Trips</div>
+      <div class="topbar-sub">Select or create a business trip</div>
+    </div>
+  </div>
+  <div class="trips-body">
+    <!-- New trip -->
+    <div class="new-trip-box">
+      <div class="new-trip-input-row">
+        <span style="font-size:18px">➕</span>
+        <input class="new-trip-input" type="text" id="new-trip-input" placeholder="New trip name e.g. NYC Sales Trip April" autocorrect="off">
+      </div>
+      <div style="padding:12px 16px">
+        <button class="btn btn-primary btn-sm" onclick="createTrip()">Create &amp; Set Active</button>
+      </div>
+    </div>
+
+    <!-- No trip option -->
+    <div class="trip-item" onclick="setActiveTrip(null)">
+      <div class="trip-item-icon" style="background:var(--surface2);border-color:var(--border2)">📁</div>
+      <div class="trip-item-info">
+        <div class="trip-item-name">No trip — use main folder</div>
+        <div class="trip-item-meta" id="main-folder-label">Saves to: Receipts</div>
+      </div>
+      <span class="trip-item-check" id="check-none" style="display:none">✓</span>
+    </div>
+
+    <div class="trips-section-label">Your Trips</div>
+    <div id="trips-list">
+      <div class="no-trips">
+        <div style="font-size:32px">✈️</div>
+        <div>No trips yet</div>
+        <div>Create your first trip above</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <button class="tab" id="t-scan2" onclick="showTab('scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      Scan
+    </button>
+    <button class="tab active" id="t-trips2">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Trips
+    </button>
+    <button class="tab" id="t-history2" onclick="showTab('history')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       History
     </button>
@@ -254,6 +361,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
       Scan
     </button>
+    <button class="tab" onclick="showTab('trips')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Trips
+    </button>
     <button class="tab active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       History
@@ -264,9 +375,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let imgB64=null, imgBlob=null, catName=null, token=null;
+// ── State ──────────────────────────────────────────────────────────────────────
+let imgB64=null,imgBlob=null,catName=null,token=null;
 let hist=JSON.parse(localStorage.getItem('rh')||'[]');
+let trips=JSON.parse(localStorage.getItem('trips')||'[]');
+let activeTrip=localStorage.getItem('activeTrip')||null; // trip name string or null
 
+// ── Config ─────────────────────────────────────────────────────────────────────
 const cfg=()=>({clientId:localStorage.getItem('gc')||'',folder:localStorage.getItem('gf')||'Receipts'});
 
 function openSetup(){const c=cfg();document.getElementById('inp-client').value=c.clientId;document.getElementById('inp-folder').value=c.folder;document.getElementById('setup-overlay').classList.add('show')}
@@ -274,13 +389,20 @@ function closeSetup(){document.getElementById('setup-overlay').classList.remove(
 function saveSetup(){
   localStorage.setItem('gc',document.getElementById('inp-client').value.trim());
   localStorage.setItem('gf',document.getElementById('inp-folder').value.trim()||'Receipts');
-  document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
+  updateBanner();
   closeSetup();toast('Settings saved');
 }
 
+// ── Screens / Tabs ─────────────────────────────────────────────────────────────
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function showTab(t){if(t==='scan')showScreen('scan-screen');if(t==='history'){renderHist();showScreen('history-screen')}}
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+  if(t==='scan'){showScreen('scan-screen');document.getElementById('t-scan').classList.add('active')}
+  if(t==='trips'){renderTrips();showScreen('trips-screen');document.getElementById('t-trips2').classList.add('active')}
+  if(t==='history'){renderHist();showScreen('history-screen')}
+}
 
+// ── Auth ───────────────────────────────────────────────────────────────────────
 function connectGoogle(){
   const c=cfg();
   if(!c.clientId){openSetup();toast('Enter your Google Client ID first');return}
@@ -292,11 +414,12 @@ function checkAuth(){
   if(h.includes('access_token')){
     token=new URLSearchParams(h.slice(1)).get('access_token');
     history.replaceState({},'',location.pathname);
-    document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
+    updateBanner();
     showScreen('scan-screen');
   } else showScreen('auth-screen');
 }
 
+// ── Camera ─────────────────────────────────────────────────────────────────────
 const fi=document.getElementById('file-input');
 function triggerPhoto(){fi.removeAttribute('capture');fi.click()}
 function triggerCamera(){fi.setAttribute('capture','environment');fi.click()}
@@ -317,10 +440,10 @@ fi.addEventListener('change',function(e){
   r.readAsDataURL(f);this.value='';
 });
 
+// ── Form ───────────────────────────────────────────────────────────────────────
 function pickCat(el){
   document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');
-  catName=el.dataset.cat;
-  el.classList.add('s-'+catName.toLowerCase());
+  catName=el.dataset.cat;el.classList.add('s-'+catName.toLowerCase());
   onChange();
 }
 
@@ -334,13 +457,9 @@ function fname(){
 
 function onChange(){
   const bar=document.getElementById('fname-bar');
-  if(imgB64&&document.getElementById('f-vendor').value.trim()&&catName){
-    bar.textContent='📄 '+fname();bar.style.display='block';
-    document.getElementById('save-btn').disabled=false;
-  } else {
-    bar.style.display='none';
-    document.getElementById('save-btn').disabled=true;
-  }
+  const ready=imgB64&&document.getElementById('f-vendor').value.trim()&&catName;
+  if(ready){bar.textContent='📄 '+fname();bar.style.display='block';document.getElementById('save-btn').disabled=false}
+  else{bar.style.display='none';document.getElementById('save-btn').disabled=true}
 }
 
 function today(){return new Date().toISOString().split('T')[0]}
@@ -355,8 +474,83 @@ function clearForm(){
   document.getElementById('fname-bar').style.display='none';
   document.getElementById('save-btn').disabled=true;
 }
-function resetAndScan(){clearForm();showScreen('scan-screen')}
+function resetAndScan(){clearForm();showTab('scan')}
 
+// ── Trip Management ────────────────────────────────────────────────────────────
+function createTrip(){
+  const inp=document.getElementById('new-trip-input');
+  const name=inp.value.trim();
+  if(!name){toast('Enter a trip name first');return}
+  if(trips.includes(name)){toast('Trip already exists');setActiveTrip(name);inp.value='';return}
+  trips.unshift(name);
+  localStorage.setItem('trips',JSON.stringify(trips));
+  setActiveTrip(name);
+  inp.value='';
+  renderTrips();
+  toast('Trip created & set active');
+}
+
+function setActiveTrip(name){
+  activeTrip=name;
+  if(name) localStorage.setItem('activeTrip',name);
+  else localStorage.removeItem('activeTrip');
+  updateBanner();
+  renderTrips();
+  // Go back to scan after selecting
+  setTimeout(()=>showTab('scan'),300);
+}
+
+function deleteTrip(name,e){
+  e.stopPropagation();
+  if(!confirm('Delete trip "'+name+'"? Receipts already saved to Google Drive will not be affected.'))return;
+  trips=trips.filter(t=>t!==name);
+  localStorage.setItem('trips',JSON.stringify(trips));
+  if(activeTrip===name)setActiveTrip(null);
+  renderTrips();
+  toast('Trip deleted');
+}
+
+function updateBanner(){
+  const banner=document.getElementById('trip-banner');
+  const nameEl=document.getElementById('banner-name');
+  const labelEl=document.getElementById('banner-label');
+  const folder=cfg().folder;
+  document.getElementById('main-folder-label').textContent='Saves to: '+folder;
+  if(activeTrip){
+    banner.classList.remove('no-trip');
+    nameEl.className='trip-name';
+    nameEl.textContent=activeTrip;
+    labelEl.textContent='Receipts go to: '+folder+' / '+activeTrip;
+  } else {
+    banner.classList.add('no-trip');
+    nameEl.className='trip-name none';
+    nameEl.textContent='No active trip';
+    labelEl.textContent='Tap to select or create a trip';
+  }
+}
+
+function renderTrips(){
+  const list=document.getElementById('trips-list');
+  // Update checkmark on "no trip" option
+  document.getElementById('check-none').style.display=activeTrip?'none':'block';
+  if(!trips.length){
+    list.innerHTML='<div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>';
+    return;
+  }
+  list.innerHTML=trips.map(t=>`
+    <div class="trip-item" onclick="setActiveTrip('${escHtml(t)}')">
+      <div class="trip-item-icon ${activeTrip===t?'active-trip':''}">${activeTrip===t?'✓':'✈️'}</div>
+      <div class="trip-item-info">
+        <div class="trip-item-name">${escHtml(t)}</div>
+        <div class="trip-item-meta">${cfg().folder} / ${escHtml(t)}</div>
+      </div>
+      <button onclick="deleteTrip('${escHtml(t)}',event)" style="background:none;border:none;color:var(--text3);font-size:18px;padding:4px 8px;cursor:pointer">🗑</button>
+    </div>`).join('');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+// ── Google Drive Upload ────────────────────────────────────────────────────────
 async function upload(){
   if(!token){toast('Not connected to Google');showScreen('auth-screen');return}
   showScreen('upload-screen');
@@ -365,18 +559,37 @@ async function upload(){
   document.getElementById('up-title').textContent='Uploading…';
   document.getElementById('up-sub').textContent='Saving your receipt image to Google Drive';
   document.getElementById('up-acts').style.display='none';
-  const filename=fname(), folder=cfg().folder;
+  const filename=fname();
+  const mainFolder=cfg().folder;
+
   try{
-    const fid=await mkFolder(folder);
+    // Get or create main folder
+    const mainId=await mkFolder(mainFolder,null);
+    // If trip active, get or create subfolder inside main folder
+    const targetId=activeTrip ? await mkFolder(activeTrip,mainId) : mainId;
     const blob=imgBlob||b64blob(imgB64,'image/jpeg');
-    await pushFile(blob,filename,fid);
-    const entry={id:Date.now(),vendor:document.getElementById('f-vendor').value||'Unknown',date:document.getElementById('f-date').value||today(),amount:document.getElementById('f-amount').value||'',category:catName||'Other',filename,thumb:'data:image/jpeg;base64,'+imgB64};
-    hist.unshift(entry);localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
+    await pushFile(blob,filename,targetId);
+
+    const entry={
+      id:Date.now(),
+      vendor:document.getElementById('f-vendor').value||'Unknown',
+      date:document.getElementById('f-date').value||today(),
+      amount:document.getElementById('f-amount').value||'',
+      category:catName||'Other',
+      trip:activeTrip||null,
+      filename,
+      thumb:'data:image/jpeg;base64,'+imgB64
+    };
+    hist.unshift(entry);
+    localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
+
+    const dest=activeTrip ? mainFolder+' / '+activeTrip : mainFolder;
     document.getElementById('up-icon').className='up-icon success';
     document.getElementById('up-icon').textContent='✓';
     document.getElementById('up-title').textContent='Saved!';
-    document.getElementById('up-sub').textContent=(entry.vendor)+(entry.amount?' · '+entry.amount:'')+' → '+folder;
+    document.getElementById('up-sub').textContent=(entry.vendor)+(entry.amount?' · '+entry.amount:'')+'\n→ '+dest;
     document.getElementById('up-acts').style.display='flex';
+
   }catch(err){
     document.getElementById('up-icon').className='up-icon error';
     document.getElementById('up-icon').textContent='✕';
@@ -386,11 +599,16 @@ async function upload(){
   }
 }
 
-async function mkFolder(name){
-  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(name)}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)`,{headers:{Authorization:'Bearer '+token}});
+async function mkFolder(name,parentId){
+  let q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if(parentId) q+=` and '${parentId}' in parents`;
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
+    {headers:{Authorization:'Bearer '+token}});
   const d=await r.json();
   if(d.files&&d.files.length)return d.files[0].id;
-  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder'})});
+  const body={name,mimeType:'application/vnd.google-apps.folder'};
+  if(parentId)body.parents=[parentId];
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
   const f=await cr.json();
   if(!f.id)throw new Error('Could not create folder in Google Drive');
   return f.id;
@@ -407,19 +625,30 @@ async function pushFile(blob,filename,folderId){
 
 function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
+// ── History ────────────────────────────────────────────────────────────────────
 function renderHist(){
   document.getElementById('hist-count').textContent=hist.length+' receipt'+(hist.length!==1?'s':'');
   const b=document.getElementById('hist-body');
-  if(!hist.length){b.innerHTML='<div class="hist-empty"><div style="font-size:36px">🧾</div><div>No receipts yet</div><div>Scan your first receipt to get started</div></div>';return}
-  b.innerHTML=hist.map(r=>`<div class="r-item"><div class="r-thumb">${r.thumb?'<img src="'+r.thumb+'" loading="lazy">':''}</div><div class="r-info"><div class="r-vendor">${r.vendor}</div><div class="r-meta">${r.date} · ${r.category}</div></div><div class="r-amt">${r.amount||'—'}</div></div>`).join('');
+  if(!hist.length){b.innerHTML='<div class="hist-empty"><div style="font-size:36px">🧾</div><div>No receipts yet</div></div>';return}
+  b.innerHTML=hist.map(r=>`
+    <div class="r-item">
+      <div class="r-thumb">${r.thumb?'<img src="'+r.thumb+'" loading="lazy">':''}</div>
+      <div class="r-info">
+        <div class="r-vendor">${r.vendor}</div>
+        <div class="r-meta">${r.date} · ${r.category}${r.trip?' · ✈️ '+r.trip:''}</div>
+      </div>
+      <div class="r-amt">${r.amount||'—'}</div>
+    </div>`).join('');
 }
 
+// ── Toast ──────────────────────────────────────────────────────────────────────
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
 
+// ── Init ───────────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
-  document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
   document.getElementById('f-date').value=today();
   document.getElementById('inp-folder').value=cfg().folder;
+  updateBanner();
   checkAuth();
 });
 </script>
