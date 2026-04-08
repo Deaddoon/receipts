@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ReceiptScan">
+<title>ReceiptScan</title>
+<style>
+  :root {
+    --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#252525;
+    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+    --text:#f0ede8; --text2:#9a9690; --text3:#5a5754;
+    --accent:#e8d5a3; --accent-bg:rgba(232,213,163,0.1);
+    --green:#7ecfa4; --green-bg:rgba(126,207,164,0.1);
+    --red:#e07070;
+    --r:14px; --rs:8px;
+    --font:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  .screen{display:none;flex-direction:column;min-height:100vh}
+  .screen.active{display:flex}
+  .topbar{padding:52px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .topbar-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+  .topbar-sub{font-size:13px;color:var(--text2);margin-top:2px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:var(--r);border:none;font-family:var(--font);font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;-webkit-appearance:none;width:100%}
+  .btn:active{transform:scale(.97);opacity:.8}
+  .btn-primary{background:var(--accent);color:#1a1600}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:.5px solid var(--border2)}
+  .btn-ghost{background:transparent;color:var(--text2)}
+  .btn:disabled{opacity:.35;pointer-events:none}
+  .btn-sm{padding:10px 16px;font-size:14px;border-radius:var(--rs)}
+  .btn-icon{width:40px;height:40px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface2);border:.5px solid var(--border2);font-size:17px}
+
+  /* SCAN */
+  #scan-screen{background:var(--bg)}
+  .scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 20px 0;gap:16px;overflow-y:auto}
+  .camera-zone{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:18px;border:1.5px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;background:var(--surface);cursor:pointer;flex-shrink:0}
+  .camera-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px}
+  .cam-ph{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .cam-icon{width:60px;height:60px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
+  .cam-label{font-size:15px;color:var(--text2);font-weight:500}
+  .cam-sub{font-size:12px;color:var(--text3)}
+  .corner{position:absolute;width:22px;height:22px;border-color:var(--accent);border-style:solid;opacity:.6}
+  .c-tl{top:12px;left:12px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
+  .c-br{bottom:12px;right:12px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
+  .photo-actions{display:flex;gap:10px;width:100%;max-width:360px}
+  .photo-actions .btn{flex:1}
+  .entry-form{width:100%;max-width:360px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden}
+  .form-row{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);gap:12px}
+  .form-row:last-child{border-bottom:none}
+  .form-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;width:70px;flex-shrink:0}
+  .form-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
+  .form-input::placeholder{color:var(--text3)}
+  .cat-wrap{display:flex;flex-wrap:wrap;gap:7px}
+  .cat-pill{padding:6px 13px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
+  .cat-pill.s-dining  {background:rgba(212,165,201,.15);color:#d4a5c9;border-color:#d4a5c9}
+  .cat-pill.s-travel  {background:rgba(126,207,164,.15);color:#7ecfa4;border-color:#7ecfa4}
+  .cat-pill.s-gas     {background:rgba(240,185,107,.15);color:#f0b96b;border-color:#f0b96b}
+  .cat-pill.s-parking {background:rgba(126,184,224,.15);color:#7eb8e0;border-color:#7eb8e0}
+  .cat-pill.s-other   {background:rgba(154,150,144,.15);color:#9a9690;border-color:#9a9690}
+  .fname-bar{padding:10px 14px;background:var(--accent-bg);border-radius:var(--rs);border:.5px solid rgba(232,213,163,.2);font-size:11px;color:var(--accent);font-family:'SF Mono','Menlo',monospace;word-break:break-all;display:none;width:100%;max-width:360px}
+  .scan-footer{padding:14px 20px 36px;display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+
+  /* UPLOAD */
+  #upload-screen{align-items:center;justify-content:center;padding:40px 20px;gap:18px}
+  .up-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .up-icon.loading{background:var(--accent-bg);border:1px solid rgba(232,213,163,.2);animation:pulse 1.4s ease-in-out infinite}
+  .up-icon.success{background:var(--green-bg);border:1px solid rgba(126,207,164,.25)}
+  .up-icon.error  {background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.25)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .up-title{font-size:22px;font-weight:700;text-align:center;letter-spacing:-.3px}
+  .up-sub{font-size:14px;color:var(--text2);text-align:center;max-width:280px;line-height:1.5}
+  .up-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
+
+  /* HISTORY */
+  #history-screen{background:var(--bg)}
+  .hist-body{flex:1;overflow-y:auto;padding:0 20px 20px}
+  .hist-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--text3);font-size:14px;text-align:center}
+  .r-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:.5px solid var(--border)}
+  .r-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;background:var(--surface2);flex-shrink:0}
+  .r-thumb img{width:100%;height:100%;object-fit:cover}
+  .r-info{flex:1;min-width:0}
+  .r-vendor{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .r-meta{font-size:12px;color:var(--text2);margin-top:2px}
+  .r-amt{font-size:16px;font-weight:600;color:var(--accent);flex-shrink:0}
+
+  /* AUTH */
+  #auth-screen{align-items:center;justify-content:center;padding:40px 20px;gap:22px;text-align:center}
+  .auth-logo{font-size:52px}
+  .auth-title{font-size:26px;font-weight:700;letter-spacing:-.5px}
+  .auth-sub{font-size:14px;color:var(--text2);max-width:280px;line-height:1.6}
+  .perm-card{width:100%;max-width:320px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden}
+  .perm-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--border);font-size:13px;color:var(--text2)}
+  .perm-row:last-child{border-bottom:none}
+  .auth-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
+
+  /* SETUP */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .overlay.show{display:flex}
+  .ov-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border2);padding:22px;width:100%;max-width:340px}
+  .ov-title{font-size:17px;font-weight:700;margin-bottom:6px}
+  .ov-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .field-lbl{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+  .field-inp{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--rs);padding:12px 14px;font-family:var(--font);font-size:14px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
+  .field-inp:focus{border-color:rgba(232,213,163,.5)}
+  .field-inp::placeholder{color:var(--text3)}
+  .field-hint{font-size:11px;color:var(--text3);line-height:1.4}
+
+  /* TABS */
+  .tabbar{display:flex;background:var(--surface);border-top:.5px solid var(--border);padding-bottom:max(env(safe-area-inset-bottom),16px);flex-shrink:0}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 8px 2px;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500}
+  .tab.active{color:var(--accent)}
+  .tab svg{width:22px;height:22px}
+
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--surface2);border:.5px solid var(--border2);padding:10px 18px;border-radius:20px;font-size:13px;color:var(--text2);opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200}
+  .toast.show{opacity:1}
+  #file-input{display:none}
+</style>
+</head>
+<body>
+
+<input type="file" id="file-input" accept="image/*">
+
+<!-- SETUP OVERLAY -->
+<div class="overlay" id="setup-overlay">
+  <div class="ov-card">
+    <div class="ov-title">⚙️ Google Drive Setup</div>
+    <div class="ov-sub">You only need a Google OAuth Client ID — no other credentials required.</div>
+    <div class="field">
+      <div class="field-lbl">Google Client ID</div>
+      <input class="field-inp" type="text" id="inp-client" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="field-hint">Get this at console.cloud.google.com → APIs &amp; Services → Credentials → OAuth 2.0 Client ID (Web application). Add this page's URL as an Authorized Redirect URI.</div>
+    </div>
+    <div class="field">
+      <div class="field-lbl">Folder Name in Google Drive</div>
+      <input class="field-inp" type="text" id="inp-folder" placeholder="Receipts">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeSetup()">Cancel</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveSetup()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="screen" id="auth-screen">
+  <div class="auth-logo">🧾</div>
+  <div class="auth-title">ReceiptScan</div>
+  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive folder.</div>
+  <div class="perm-card">
+    <div class="perm-row"><span style="font-size:18px">📷</span> Photograph or pick receipt images</div>
+    <div class="perm-row"><span style="font-size:18px">✏️</span> Enter vendor, date, amount &amp; category</div>
+    <div class="perm-row"><span style="font-size:18px">📁</span> Uploads the image to Google Drive</div>
+    <div class="perm-row"><span style="font-size:18px">🔒</span> Only your Google account is accessed</div>
+  </div>
+  <div class="auth-acts">
+    <button class="btn btn-primary" onclick="connectGoogle()">Connect Google Drive</button>
+    <button class="btn btn-ghost" onclick="openSetup()">⚙️ Setup Client ID first</button>
+  </div>
+</div>
+
+<!-- SCAN SCREEN -->
+<div class="screen" id="scan-screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🧾 ReceiptScan</div>
+      <div class="topbar-sub" id="folder-label">Saving to: Receipts</div>
+    </div>
+    <button class="btn btn-icon" onclick="openSetup()">⚙️</button>
+  </div>
+  <div class="scan-body">
+    <div class="camera-zone" id="camera-zone" onclick="triggerPhoto()">
+      <div class="corner c-tl"></div>
+      <div class="corner c-br"></div>
+      <div class="cam-ph" id="cam-ph">
+        <div class="cam-icon">📷</div>
+        <div class="cam-label">Tap to take photo</div>
+        <div class="cam-sub">Or choose from camera roll</div>
+      </div>
+    </div>
+    <div class="photo-actions">
+      <button class="btn btn-secondary btn-sm" onclick="triggerCamera()">📸 Camera</button>
+      <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Library</button>
+    </div>
+    <div class="entry-form">
+      <div class="form-row">
+        <span class="form-label">Vendor</span>
+        <input class="form-input" type="text" id="f-vendor" placeholder="e.g. Chili's, Shell, Marriott" autocorrect="off" oninput="onChange()">
+      </div>
+      <div class="form-row">
+        <span class="form-label">Date</span>
+        <input class="form-input" type="date" id="f-date" oninput="onChange()">
+      </div>
+      <div class="form-row">
+        <span class="form-label">Amount</span>
+        <input class="form-input" type="text" id="f-amount" placeholder="$0.00" inputmode="decimal" oninput="onChange()">
+      </div>
+      <div class="form-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <span class="form-label">Category</span>
+        <div class="cat-wrap">
+          <button class="cat-pill" data-cat="Dining"  onclick="pickCat(this)">🍽 Dining</button>
+          <button class="cat-pill" data-cat="Travel"  onclick="pickCat(this)">✈️ Travel</button>
+          <button class="cat-pill" data-cat="Gas"     onclick="pickCat(this)">⛽ Gas</button>
+          <button class="cat-pill" data-cat="Parking" onclick="pickCat(this)">🅿️ Parking</button>
+          <button class="cat-pill" data-cat="Other"   onclick="pickCat(this)">📦 Other</button>
+        </div>
+      </div>
+    </div>
+    <div class="fname-bar" id="fname-bar"></div>
+    <div style="height:8px;flex-shrink:0"></div>
+  </div>
+  <div class="scan-footer">
+    <button class="btn btn-primary" id="save-btn" onclick="upload()" disabled>Save to Google Drive →</button>
+    <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+  </div>
+  <div class="tabbar">
+    <button class="tab active" onclick="showTab('scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      Scan
+    </button>
+    <button class="tab" onclick="showTab('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<!-- UPLOAD SCREEN -->
+<div class="screen" id="upload-screen">
+  <div class="up-icon loading" id="up-icon">⏳</div>
+  <div class="up-title" id="up-title">Uploading…</div>
+  <div class="up-sub" id="up-sub">Saving your receipt image to Google Drive</div>
+  <div class="up-acts" id="up-acts" style="display:none">
+    <button class="btn btn-primary" onclick="resetAndScan()">Scan Another Receipt</button>
+    <button class="btn btn-secondary" onclick="showTab('history')">View History</button>
+  </div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div class="screen" id="history-screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">History</div>
+      <div class="topbar-sub" id="hist-count">0 receipts</div>
+    </div>
+  </div>
+  <div class="hist-body" id="hist-body"></div>
+  <div class="tabbar">
+    <button class="tab" onclick="showTab('scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      Scan
+    </button>
+    <button class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let imgB64=null, imgBlob=null, catName=null, token=null;
+let hist=JSON.parse(localStorage.getItem('rh')||'[]');
+
+const cfg=()=>({clientId:localStorage.getItem('gc')||'',folder:localStorage.getItem('gf')||'Receipts'});
+
+function openSetup(){const c=cfg();document.getElementById('inp-client').value=c.clientId;document.getElementById('inp-folder').value=c.folder;document.getElementById('setup-overlay').classList.add('show')}
+function closeSetup(){document.getElementById('setup-overlay').classList.remove('show')}
+function saveSetup(){
+  localStorage.setItem('gc',document.getElementById('inp-client').value.trim());
+  localStorage.setItem('gf',document.getElementById('inp-folder').value.trim()||'Receipts');
+  document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
+  closeSetup();toast('Settings saved');
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showTab(t){if(t==='scan')showScreen('scan-screen');if(t==='history'){renderHist();showScreen('history-screen')}}
+
+function connectGoogle(){
+  const c=cfg();
+  if(!c.clientId){openSetup();toast('Enter your Google Client ID first');return}
+  const p=new URLSearchParams({client_id:c.clientId,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/drive.file',state:'auth'});
+  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
+}
+function checkAuth(){
+  const h=location.hash;
+  if(h.includes('access_token')){
+    token=new URLSearchParams(h.slice(1)).get('access_token');
+    history.replaceState({},'',location.pathname);
+    document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
+    showScreen('scan-screen');
+  } else showScreen('auth-screen');
+}
+
+const fi=document.getElementById('file-input');
+function triggerPhoto(){fi.removeAttribute('capture');fi.click()}
+function triggerCamera(){fi.setAttribute('capture','environment');fi.click()}
+function triggerLibrary(){fi.removeAttribute('capture');fi.click()}
+
+fi.addEventListener('change',function(e){
+  const f=e.target.files[0];if(!f)return;
+  imgBlob=f;
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgB64=ev.target.result.split(',')[1];
+    let p=document.getElementById('cam-prev');
+    if(!p){p=document.createElement('img');p.id='cam-prev';document.getElementById('camera-zone').appendChild(p)}
+    p.src=ev.target.result;
+    document.getElementById('cam-ph').style.display='none';
+    onChange();
+  };
+  r.readAsDataURL(f);this.value='';
+});
+
+function pickCat(el){
+  document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');
+  catName=el.dataset.cat;
+  el.classList.add('s-'+catName.toLowerCase());
+  onChange();
+}
+
+function fname(){
+  const v=(document.getElementById('f-vendor').value||'').replace(/[^a-zA-Z0-9 &]/g,'').replace(/\s+/g,'_').slice(0,30)||'Receipt';
+  const d=document.getElementById('f-date').value||today();
+  const a=(document.getElementById('f-amount').value||'').replace(/[^0-9.]/g,'');
+  const c=catName||'Uncategorized';
+  return `${d}_${v}_${c}${a?'_$'+a:''}.jpg`;
+}
+
+function onChange(){
+  const bar=document.getElementById('fname-bar');
+  if(imgB64&&document.getElementById('f-vendor').value.trim()&&catName){
+    bar.textContent='📄 '+fname();bar.style.display='block';
+    document.getElementById('save-btn').disabled=false;
+  } else {
+    bar.style.display='none';
+    document.getElementById('save-btn').disabled=true;
+  }
+}
+
+function today(){return new Date().toISOString().split('T')[0]}
+
+function clearForm(){
+  imgB64=null;imgBlob=null;catName=null;
+  ['f-vendor','f-date','f-amount'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-date').value=today();
+  document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');
+  const p=document.getElementById('cam-prev');if(p)p.remove();
+  document.getElementById('cam-ph').style.display='flex';
+  document.getElementById('fname-bar').style.display='none';
+  document.getElementById('save-btn').disabled=true;
+}
+function resetAndScan(){clearForm();showScreen('scan-screen')}
+
+async function upload(){
+  if(!token){toast('Not connected to Google');showScreen('auth-screen');return}
+  showScreen('upload-screen');
+  document.getElementById('up-icon').className='up-icon loading';
+  document.getElementById('up-icon').textContent='⏳';
+  document.getElementById('up-title').textContent='Uploading…';
+  document.getElementById('up-sub').textContent='Saving your receipt image to Google Drive';
+  document.getElementById('up-acts').style.display='none';
+  const filename=fname(), folder=cfg().folder;
+  try{
+    const fid=await mkFolder(folder);
+    const blob=imgBlob||b64blob(imgB64,'image/jpeg');
+    await pushFile(blob,filename,fid);
+    const entry={id:Date.now(),vendor:document.getElementById('f-vendor').value||'Unknown',date:document.getElementById('f-date').value||today(),amount:document.getElementById('f-amount').value||'',category:catName||'Other',filename,thumb:'data:image/jpeg;base64,'+imgB64};
+    hist.unshift(entry);localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
+    document.getElementById('up-icon').className='up-icon success';
+    document.getElementById('up-icon').textContent='✓';
+    document.getElementById('up-title').textContent='Saved!';
+    document.getElementById('up-sub').textContent=(entry.vendor)+(entry.amount?' · '+entry.amount:'')+' → '+folder;
+    document.getElementById('up-acts').style.display='flex';
+  }catch(err){
+    document.getElementById('up-icon').className='up-icon error';
+    document.getElementById('up-icon').textContent='✕';
+    document.getElementById('up-title').textContent='Upload failed';
+    document.getElementById('up-sub').textContent=err.message||'Check your connection and try again.';
+    document.getElementById('up-acts').style.display='flex';
+  }
+}
+
+async function mkFolder(name){
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(name)}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)`,{headers:{Authorization:'Bearer '+token}});
+  const d=await r.json();
+  if(d.files&&d.files.length)return d.files[0].id;
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder'})});
+  const f=await cr.json();
+  if(!f.id)throw new Error('Could not create folder in Google Drive');
+  return f.id;
+}
+
+async function pushFile(blob,filename,folderId){
+  const meta=JSON.stringify({name:filename,parents:[folderId]});
+  const bnd='rb_'+Date.now();
+  const body=new Blob([`--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,`--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,blob,`\r\n--${bnd}--`],{type:`multipart/related; boundary=${bnd}`});
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},body});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Upload failed ('+r.status+')')}
+  return r.json();
+}
+
+function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
+
+function renderHist(){
+  document.getElementById('hist-count').textContent=hist.length+' receipt'+(hist.length!==1?'s':'');
+  const b=document.getElementById('hist-body');
+  if(!hist.length){b.innerHTML='<div class="hist-empty"><div style="font-size:36px">🧾</div><div>No receipts yet</div><div>Scan your first receipt to get started</div></div>';return}
+  b.innerHTML=hist.map(r=>`<div class="r-item"><div class="r-thumb">${r.thumb?'<img src="'+r.thumb+'" loading="lazy">':''}</div><div class="r-info"><div class="r-vendor">${r.vendor}</div><div class="r-meta">${r.date} · ${r.category}</div></div><div class="r-amt">${r.amount||'—'}</div></div>`).join('');
+}
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
+
+window.addEventListener('load',()=>{
+  document.getElementById('folder-label').textContent='Saving to: '+cfg().folder;
+  document.getElementById('f-date').value=today();
+  document.getElementById('inp-folder').value=cfg().folder;
+  checkAuth();
+});
+</script>
+</body>
+</html>
