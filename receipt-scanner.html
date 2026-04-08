@@ -30,19 +30,10 @@
   .btn-primary{background:var(--accent);color:#1a1600}
   .btn-secondary{background:var(--surface2);color:var(--text);border:.5px solid var(--border2)}
   .btn-ghost{background:transparent;color:var(--text2)}
-  .btn-danger{background:rgba(224,112,112,0.12);color:var(--red);border:.5px solid rgba(224,112,112,0.3)}
   .btn:disabled{opacity:.35;pointer-events:none}
   .btn-sm{padding:10px 16px;font-size:14px;border-radius:var(--rs)}
   .btn-icon{width:40px;height:40px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface2);border:.5px solid var(--border2);font-size:17px}
-
-  /* TRIP BANNER */
-  .trip-banner{
-    margin:0 20px 4px;padding:12px 16px;
-    background:var(--accent-bg);border-radius:var(--r);
-    border:.5px solid rgba(232,213,163,0.25);
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    flex-shrink:0;cursor:pointer;
-  }
+  .trip-banner{margin:0 20px 4px;padding:12px 16px;background:var(--accent-bg);border-radius:var(--r);border:.5px solid rgba(232,213,163,0.25);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;cursor:pointer}
   .trip-banner.no-trip{background:var(--surface);border-color:var(--border2)}
   .trip-banner-left{display:flex;align-items:center;gap:10px;min-width:0}
   .trip-icon{font-size:18px;flex-shrink:0}
@@ -50,8 +41,6 @@
   .trip-name.none{color:var(--text3);font-weight:400}
   .trip-label{font-size:11px;color:var(--text3);margin-top:1px}
   .trip-change{font-size:12px;color:var(--text3);flex-shrink:0}
-
-  /* SCAN */
   #scan-screen{background:var(--bg)}
   .scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 20px 0;gap:16px;overflow-y:auto}
   .camera-zone{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:18px;border:1.5px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;background:var(--surface);cursor:pointer;flex-shrink:0}
@@ -73,15 +62,13 @@
   .form-input::placeholder{color:var(--text3)}
   .cat-wrap{display:flex;flex-wrap:wrap;gap:7px}
   .cat-pill{padding:6px 13px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
-  .cat-pill.s-dining  {background:rgba(212,165,201,.15);color:#d4a5c9;border-color:#d4a5c9}
-  .cat-pill.s-travel  {background:rgba(126,207,164,.15);color:#7ecfa4;border-color:#7ecfa4}
-  .cat-pill.s-gas     {background:rgba(240,185,107,.15);color:#f0b96b;border-color:#f0b96b}
-  .cat-pill.s-parking {background:rgba(126,184,224,.15);color:#7eb8e0;border-color:#7eb8e0}
-  .cat-pill.s-other   {background:rgba(154,150,144,.15);color:#9a9690;border-color:#9a9690}
+  .cat-pill.s-dining{background:rgba(212,165,201,.15);color:#d4a5c9;border-color:#d4a5c9}
+  .cat-pill.s-travel{background:rgba(126,207,164,.15);color:#7ecfa4;border-color:#7ecfa4}
+  .cat-pill.s-gas{background:rgba(240,185,107,.15);color:#f0b96b;border-color:#f0b96b}
+  .cat-pill.s-parking{background:rgba(126,184,224,.15);color:#7eb8e0;border-color:#7eb8e0}
+  .cat-pill.s-other{background:rgba(154,150,144,.15);color:#9a9690;border-color:#9a9690}
   .fname-bar{padding:10px 14px;background:var(--accent-bg);border-radius:var(--rs);border:.5px solid rgba(232,213,163,.2);font-size:11px;color:var(--accent);font-family:'SF Mono','Menlo',monospace;word-break:break-all;display:none;width:100%;max-width:360px}
   .scan-footer{padding:14px 20px 36px;display:flex;flex-direction:column;gap:10px;flex-shrink:0}
-
-  /* UPLOAD */
   #upload-screen{align-items:center;justify-content:center;padding:40px 20px;gap:18px}
   .up-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px}
   .up-icon.loading{background:var(--accent-bg);border:1px solid rgba(232,213,163,.2);animation:pulse 1.4s ease-in-out infinite}
@@ -91,8 +78,6 @@
   .up-title{font-size:22px;font-weight:700;text-align:center;letter-spacing:-.3px}
   .up-sub{font-size:14px;color:var(--text2);text-align:center;max-width:280px;line-height:1.5}
   .up-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
-
-  /* TRIPS SCREEN */
   #trips-screen{background:var(--bg)}
   .trips-body{flex:1;overflow-y:auto;padding:0 20px 20px}
   .new-trip-box{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden;margin-bottom:16px}
@@ -107,10 +92,7 @@
   .trip-item-info{flex:1;min-width:0}
   .trip-item-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .trip-item-meta{font-size:12px;color:var(--text2);margin-top:2px}
-  .trip-item-check{font-size:18px;color:var(--accent);flex-shrink:0}
   .no-trips{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 20px;color:var(--text3);font-size:14px;text-align:center}
-
-  /* HISTORY */
   #history-screen{background:var(--bg)}
   .hist-body{flex:1;overflow-y:auto;padding:0 20px 20px}
   .hist-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--text3);font-size:14px;text-align:center}
@@ -121,8 +103,6 @@
   .r-vendor{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .r-meta{font-size:12px;color:var(--text2);margin-top:2px}
   .r-amt{font-size:16px;font-weight:600;color:var(--accent);flex-shrink:0}
-
-  /* AUTH */
   #auth-screen{align-items:center;justify-content:center;padding:40px 20px;gap:22px;text-align:center}
   .auth-logo{font-size:52px}
   .auth-title{font-size:26px;font-weight:700;letter-spacing:-.5px}
@@ -131,8 +111,6 @@
   .perm-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--border);font-size:13px;color:var(--text2)}
   .perm-row:last-child{border-bottom:none}
   .auth-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
-
-  /* SETUP */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:100}
   .overlay.show{display:flex}
   .ov-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border2);padding:22px;width:100%;max-width:340px}
@@ -144,13 +122,10 @@
   .field-inp:focus{border-color:rgba(232,213,163,.5)}
   .field-inp::placeholder{color:var(--text3)}
   .field-hint{font-size:11px;color:var(--text3);line-height:1.4}
-
-  /* TABS */
   .tabbar{display:flex;background:var(--surface);border-top:.5px solid var(--border);padding-bottom:max(env(safe-area-inset-bottom),16px);flex-shrink:0}
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 8px 2px;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500}
   .tab.active{color:var(--accent)}
   .tab svg{width:22px;height:22px}
-
   .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--surface2);border:.5px solid var(--border2);padding:10px 18px;border-radius:20px;font-size:13px;color:var(--text2);opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200}
   .toast.show{opacity:1}
   #file-input{display:none}
@@ -202,13 +177,9 @@
 <!-- SCAN SCREEN -->
 <div class="screen" id="scan-screen">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">🧾 ReceiptScan</div>
-    </div>
+    <div><div class="topbar-title">🧾 ReceiptScan</div></div>
     <button class="btn btn-icon" onclick="openSetup()">⚙️</button>
   </div>
-
-  <!-- Active trip banner -->
   <div class="trip-banner no-trip" id="trip-banner" onclick="showTab('trips')">
     <div class="trip-banner-left">
       <span class="trip-icon">✈️</span>
@@ -219,7 +190,6 @@
     </div>
     <span class="trip-change">Change →</span>
   </div>
-
   <div class="scan-body">
     <div class="camera-zone" id="camera-zone" onclick="triggerPhoto()">
       <div class="corner c-tl"></div>
@@ -290,7 +260,6 @@
     </div>
   </div>
   <div class="trips-body">
-    <!-- New trip -->
     <div class="new-trip-box">
       <div class="new-trip-input-row">
         <span style="font-size:18px">➕</span>
@@ -300,17 +269,14 @@
         <button class="btn btn-primary btn-sm" onclick="createTrip()">Create &amp; Set Active</button>
       </div>
     </div>
-
-    <!-- No trip option -->
     <div class="trip-item" onclick="setActiveTrip(null)">
       <div class="trip-item-icon" style="background:var(--surface2);border-color:var(--border2)">📁</div>
       <div class="trip-item-info">
         <div class="trip-item-name">No trip — use main folder</div>
         <div class="trip-item-meta" id="main-folder-label">Saves to: Receipts</div>
       </div>
-      <span class="trip-item-check" id="check-none" style="display:none">✓</span>
+      <span class="trip-item-check" id="check-none" style="display:none;color:var(--accent);font-size:18px">✓</span>
     </div>
-
     <div class="trips-section-label">Your Trips</div>
     <div id="trips-list">
       <div class="no-trips">
@@ -321,7 +287,7 @@
     </div>
   </div>
   <div class="tabbar">
-    <button class="tab" id="t-scan2" onclick="showTab('scan')">
+    <button class="tab" onclick="showTab('scan')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
       Scan
     </button>
@@ -329,7 +295,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
       Trips
     </button>
-    <button class="tab" id="t-history2" onclick="showTab('history')">
+    <button class="tab" onclick="showTab('history')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       History
     </button>
@@ -379,7 +345,11 @@
 let imgB64=null,imgBlob=null,catName=null,token=null;
 let hist=JSON.parse(localStorage.getItem('rh')||'[]');
 let trips=JSON.parse(localStorage.getItem('trips')||'[]');
-let activeTrip=localStorage.getItem('activeTrip')||null; // trip name string or null
+let activeTrip=localStorage.getItem('activeTrip')||null;
+
+// KEY FIX: Cache folder IDs to avoid repeated API searches
+// Structure: { "FolderName": "googleDriveFolderId", "FolderName/SubFolder": "googleDriveFolderId" }
+let folderCache={};
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 const cfg=()=>({clientId:localStorage.getItem('gc')||'',folder:localStorage.getItem('gf')||'Receipts'});
@@ -389,6 +359,7 @@ function closeSetup(){document.getElementById('setup-overlay').classList.remove(
 function saveSetup(){
   localStorage.setItem('gc',document.getElementById('inp-client').value.trim());
   localStorage.setItem('gf',document.getElementById('inp-folder').value.trim()||'Receipts');
+  folderCache={}; // clear cache when settings change
   updateBanner();
   closeSetup();toast('Settings saved');
 }
@@ -414,6 +385,7 @@ function checkAuth(){
   if(h.includes('access_token')){
     token=new URLSearchParams(h.slice(1)).get('access_token');
     history.replaceState({},'',location.pathname);
+    folderCache={}; // fresh token = fresh cache
     updateBanner();
     showScreen('scan-screen');
   } else showScreen('auth-screen');
@@ -446,7 +418,6 @@ function pickCat(el){
   catName=el.dataset.cat;el.classList.add('s-'+catName.toLowerCase());
   onChange();
 }
-
 function fname(){
   const v=(document.getElementById('f-vendor').value||'').replace(/[^a-zA-Z0-9 &]/g,'').replace(/\s+/g,'_').slice(0,30)||'Receipt';
   const d=document.getElementById('f-date').value||today();
@@ -454,16 +425,13 @@ function fname(){
   const c=catName||'Uncategorized';
   return `${d}_${v}_${c}${a?'_$'+a:''}.jpg`;
 }
-
 function onChange(){
   const bar=document.getElementById('fname-bar');
   const ready=imgB64&&document.getElementById('f-vendor').value.trim()&&catName;
   if(ready){bar.textContent='📄 '+fname();bar.style.display='block';document.getElementById('save-btn').disabled=false}
   else{bar.style.display='none';document.getElementById('save-btn').disabled=true}
 }
-
 function today(){return new Date().toISOString().split('T')[0]}
-
 function clearForm(){
   imgB64=null;imgBlob=null;catName=null;
   ['f-vendor','f-date','f-amount'].forEach(id=>document.getElementById(id).value='');
@@ -489,27 +457,26 @@ function createTrip(){
   renderTrips();
   toast('Trip created & set active');
 }
-
 function setActiveTrip(name){
   activeTrip=name;
-  if(name) localStorage.setItem('activeTrip',name);
+  if(name)localStorage.setItem('activeTrip',name);
   else localStorage.removeItem('activeTrip');
   updateBanner();
   renderTrips();
-  // Go back to scan after selecting
   setTimeout(()=>showTab('scan'),300);
 }
-
 function deleteTrip(name,e){
   e.stopPropagation();
   if(!confirm('Delete trip "'+name+'"? Receipts already saved to Google Drive will not be affected.'))return;
   trips=trips.filter(t=>t!==name);
   localStorage.setItem('trips',JSON.stringify(trips));
+  // Clear cached folder ID for this trip
+  const cacheKey=cfg().folder+'/'+name;
+  delete folderCache[cacheKey];
   if(activeTrip===name)setActiveTrip(null);
   renderTrips();
   toast('Trip deleted');
 }
-
 function updateBanner(){
   const banner=document.getElementById('trip-banner');
   const nameEl=document.getElementById('banner-name');
@@ -528,10 +495,8 @@ function updateBanner(){
     labelEl.textContent='Tap to select or create a trip';
   }
 }
-
 function renderTrips(){
   const list=document.getElementById('trips-list');
-  // Update checkmark on "no trip" option
   document.getElementById('check-none').style.display=activeTrip?'none':'block';
   if(!trips.length){
     list.innerHTML='<div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>';
@@ -547,7 +512,6 @@ function renderTrips(){
       <button onclick="deleteTrip('${escHtml(t)}',event)" style="background:none;border:none;color:var(--text3);font-size:18px;padding:4px 8px;cursor:pointer">🗑</button>
     </div>`).join('');
 }
-
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
 // ── Google Drive Upload ────────────────────────────────────────────────────────
@@ -561,35 +525,20 @@ async function upload(){
   document.getElementById('up-acts').style.display='none';
   const filename=fname();
   const mainFolder=cfg().folder;
-
   try{
-    // Get or create main folder
     const mainId=await mkFolder(mainFolder,null);
-    // If trip active, get or create subfolder inside main folder
-    const targetId=activeTrip ? await mkFolder(activeTrip,mainId) : mainId;
+    const targetId=activeTrip?await mkFolder(activeTrip,mainId,mainFolder+'/'+activeTrip):mainId;
     const blob=imgBlob||b64blob(imgB64,'image/jpeg');
     await pushFile(blob,filename,targetId);
-
-    const entry={
-      id:Date.now(),
-      vendor:document.getElementById('f-vendor').value||'Unknown',
-      date:document.getElementById('f-date').value||today(),
-      amount:document.getElementById('f-amount').value||'',
-      category:catName||'Other',
-      trip:activeTrip||null,
-      filename,
-      thumb:'data:image/jpeg;base64,'+imgB64
-    };
+    const entry={id:Date.now(),vendor:document.getElementById('f-vendor').value||'Unknown',date:document.getElementById('f-date').value||today(),amount:document.getElementById('f-amount').value||'',category:catName||'Other',trip:activeTrip||null,filename,thumb:'data:image/jpeg;base64,'+imgB64};
     hist.unshift(entry);
     localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
-
-    const dest=activeTrip ? mainFolder+' / '+activeTrip : mainFolder;
+    const dest=activeTrip?mainFolder+' / '+activeTrip:mainFolder;
     document.getElementById('up-icon').className='up-icon success';
     document.getElementById('up-icon').textContent='✓';
     document.getElementById('up-title').textContent='Saved!';
     document.getElementById('up-sub').textContent=(entry.vendor)+(entry.amount?' · '+entry.amount:'')+'\n→ '+dest;
     document.getElementById('up-acts').style.display='flex';
-
   }catch(err){
     document.getElementById('up-icon').className='up-icon error';
     document.getElementById('up-icon').textContent='✕';
@@ -599,18 +548,31 @@ async function upload(){
   }
 }
 
-async function mkFolder(name,parentId){
+// KEY FIX: mkFolder now uses a cache so Google Drive API is only searched ONCE
+// per folder per session — not on every upload
+async function mkFolder(name, parentId, cacheKey){
+  const key = cacheKey || name;
+  // Return cached ID immediately — no API call needed
+  if(folderCache[key]){
+    return folderCache[key];
+  }
+  // Not cached — search Drive for existing folder
   let q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
   if(parentId) q+=` and '${parentId}' in parents`;
   const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
     {headers:{Authorization:'Bearer '+token}});
   const d=await r.json();
-  if(d.files&&d.files.length)return d.files[0].id;
+  if(d.files&&d.files.length){
+    folderCache[key]=d.files[0].id; // cache it
+    return d.files[0].id;
+  }
+  // Folder doesn't exist — create it
   const body={name,mimeType:'application/vnd.google-apps.folder'};
   if(parentId)body.parents=[parentId];
   const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
   const f=await cr.json();
   if(!f.id)throw new Error('Could not create folder in Google Drive');
+  folderCache[key]=f.id; // cache the new folder ID too
   return f.id;
 }
 
@@ -622,7 +584,6 @@ async function pushFile(blob,filename,folderId){
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Upload failed ('+r.status+')')}
   return r.json();
 }
-
 function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
 // ── History ────────────────────────────────────────────────────────────────────
