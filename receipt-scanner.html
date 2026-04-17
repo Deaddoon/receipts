@@ -157,7 +157,45 @@
   </div>
 </div>
 
-<!-- AUTH SCREEN -->
+<!-- ABOUT OVERLAY -->
+<div class="overlay" id="about-overlay" onclick="hideAbout()">
+  <div class="ov-card" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:28px">🧾</span>
+        <div>
+          <div style="font-size:17px;font-weight:700">ReceiptScan</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.0</div>
+        </div>
+      </div>
+      <button onclick="hideAbout()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px">✕</button>
+    </div>
+    <div style="border-top:.5px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">What's New</div>
+        <div style="background:var(--surface2);border-radius:var(--rs);overflow:hidden">
+          <div style="padding:12px 14px;border-bottom:.5px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:600">v1.0</span>
+              <span style="font-size:11px;color:var(--text3)">April 2026</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">
+              • Initial release<br>
+              • Photo, library &amp; document scan support<br>
+              • Manual entry: vendor, date, amount, category<br>
+              • Business trip folder organization<br>
+              • Google Drive upload<br>
+              • Local receipt history
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-align:center;line-height:1.6">
+        Receipts saved to your Google Drive<br>under the folder you configured in ⚙️ Settings
+      </div>
+    </div>
+  </div>
+</div>
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
@@ -178,7 +216,10 @@
 <div class="screen" id="scan-screen">
   <div class="topbar">
     <div><div class="topbar-title">🧾 ReceiptScan</div></div>
-    <button class="btn btn-icon" onclick="openSetup()">⚙️</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-icon" onclick="showAbout()" style="font-size:16px;color:var(--text2)">ⓘ</button>
+      <button class="btn btn-icon" onclick="openSetup()">⚙️</button>
+    </div>
   </div>
   <div class="trip-banner no-trip" id="trip-banner" onclick="showTab('trips')">
     <div class="trip-banner-left">
@@ -201,8 +242,27 @@
       </div>
     </div>
     <div class="photo-actions">
-      <button class="btn btn-secondary btn-sm" onclick="triggerCamera()">📸 Camera</button>
+      <button class="btn btn-secondary btn-sm" onclick="triggerCamera()">📷 Camera</button>
+      <button class="btn btn-secondary btn-sm" onclick="showScanTip()">📄 Scan Doc</button>
       <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Library</button>
+    </div>
+
+    <!-- Scan doc tip box -->
+    <div id="scan-tip" style="display:none;width:100%;max-width:360px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border2);padding:16px;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--accent)">📄 How to scan with your iPhone</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">
+        <b style="color:var(--text)">Option 1 — Notes app:</b><br>
+        Open Notes → tap ✏️ new note → tap 📷 camera icon → <b style="color:var(--text)">Scan Documents</b> → scan receipt → save
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">
+        <b style="color:var(--text)">Option 2 — Files app:</b><br>
+        Open Files → tap <b style="color:var(--text)">...</b> top right → <b style="color:var(--text)">Scan Documents</b> → scan receipt → save to Photos
+      </div>
+      <div style="font-size:12px;color:var(--text3)">Then come back here and tap <b style="color:var(--text2)">🖼 Library</b> to pick your scan.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="triggerLibrary();hideScanTip()">🖼 Pick from Library</button>
+        <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;width:auto;padding:10px 14px" onclick="hideScanTip()">✕</button>
+      </div>
     </div>
     <div class="entry-form">
       <div class="form-row">
@@ -354,6 +414,9 @@ let folderCache={};
 // ── Config ─────────────────────────────────────────────────────────────────────
 const cfg=()=>({clientId:localStorage.getItem('gc')||'',folder:localStorage.getItem('gf')||'Receipts'});
 
+function showAbout(){document.getElementById('about-overlay').classList.add('show')}
+function hideAbout(){document.getElementById('about-overlay').classList.remove('show')}
+
 function openSetup(){const c=cfg();document.getElementById('inp-client').value=c.clientId;document.getElementById('inp-folder').value=c.folder;document.getElementById('setup-overlay').classList.add('show')}
 function closeSetup(){document.getElementById('setup-overlay').classList.remove('show')}
 function saveSetup(){
@@ -396,6 +459,8 @@ const fi=document.getElementById('file-input');
 function triggerPhoto(){fi.removeAttribute('capture');fi.click()}
 function triggerCamera(){fi.setAttribute('capture','environment');fi.click()}
 function triggerLibrary(){fi.removeAttribute('capture');fi.click()}
+function showScanTip(){const t=document.getElementById('scan-tip');t.style.display='flex';t.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function hideScanTip(){document.getElementById('scan-tip').style.display='none'}
 
 fi.addEventListener('change',function(e){
   const f=e.target.files[0];if(!f)return;
@@ -581,8 +646,11 @@ async function pushFile(blob,filename,folderId){
   const bnd='rb_'+Date.now();
   const body=new Blob([`--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,`--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,blob,`\r\n--${bnd}--`],{type:`multipart/related; boundary=${bnd}`});
   const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},body});
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'Upload failed ('+r.status+')')}
-  return r.json();
+  // Treat any 2xx status as success — don't fail on response body parsing
+  if(r.status>=200&&r.status<300) return true;
+  // Only throw if genuinely failed (4xx/5xx)
+  const e=await r.json().catch(()=>({}));
+  throw new Error(e.error?.message||'Upload failed ('+r.status+')');
 }
 function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
