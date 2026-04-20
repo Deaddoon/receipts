@@ -44,7 +44,7 @@
   body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .2s,color .2s}
   .screen{display:none;flex-direction:column;min-height:100vh}
   .screen.active{display:flex}
-  .topbar{padding:52px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-bottom:.5px solid var(--border)}
+  .topbar{padding:env(safe-area-inset-top, 16px) 20px 12px;padding-top:max(env(safe-area-inset-top),16px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-bottom:.5px solid var(--border)}
   .topbar-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
   .topbar-sub{font-size:13px;color:var(--text2);margin-top:2px}
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--r);border:none;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;-webkit-appearance:none;width:100%}
@@ -156,26 +156,40 @@
 
 <input type="file" id="file-input" accept="image/*">
 
-<!-- SETTINGS OVERLAY -->
+<!-- EMAIL PICKER POPUP -->
+<div class="overlay" id="email-picker" onclick="closeEmailPicker()">
+  <div class="ov-card" onclick="event.stopPropagation()" style="max-width:320px">
+    <div class="ov-title" style="margin-bottom:6px">Send to...</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px" id="picker-sub">Choose which email to send this receipt to</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" id="picker-work-btn" onclick="sendToEmail('work')">💼 Work Email</button>
+      <button class="btn btn-secondary" id="picker-personal-btn" onclick="sendToEmail('personal')">🏠 Personal Email</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeEmailPicker()">Cancel</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="settings-overlay">
   <div class="ov-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div class="ov-title" style="margin:0">Settings</div>
-      <button onclick="closeSettings()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="ov-title" style="margin:0;font-size:15px">Settings</div>
+      <button onclick="closeSettings()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
     </div>
-    <div class="field">
-      <div class="field-lbl">Email for receipts</div>
-      <input class="field-inp" type="email" id="inp-email" placeholder="you@example.com">
-      <div class="field-hint">All receipt emails will be sent to this address</div>
-    </div>
-    <div class="field" style="margin-bottom:0">
-      <div class="field-lbl">Appearance</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+    <!-- Compact settings rows -->
+    <div style="background:var(--surface2);border-radius:var(--rs);overflow:hidden;margin-bottom:10px">
+      <div style="display:flex;align-items:center;padding:10px 12px;border-bottom:.5px solid var(--border);gap:10px">
+        <span style="font-size:11px;color:var(--text3);width:58px;flex-shrink:0">WORK</span>
+        <input class="field-inp" type="email" id="inp-email-work" placeholder="work@email.com" style="padding:0;background:transparent;border:none;font-size:14px">
+      </div>
+      <div style="display:flex;align-items:center;padding:10px 12px;border-bottom:.5px solid var(--border);gap:10px">
+        <span style="font-size:11px;color:var(--text3);width:58px;flex-shrink:0">PERSONAL</span>
+        <input class="field-inp" type="email" id="inp-email-personal" placeholder="personal@email.com" style="padding:0;background:transparent;border:none;font-size:14px">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px">
         <span style="font-size:14px;color:var(--text2)">Dark mode</span>
         <div class="toggle" id="dark-toggle" onclick="toggleDark()"><div class="toggle-knob"></div></div>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px">
+    <div style="display:flex;gap:8px">
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveSettings()">Save</button>
     </div>
@@ -184,14 +198,34 @@
         <span style="font-size:24px">🧾</span>
         <div>
           <div style="font-size:15px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 3.0</div>
+          <div style="font-size:11px;color:var(--text3)">Version 3.5</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Version History</div>
       <div class="v-card">
         <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.5</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">&bull; Compacted settings overlay</div>
+        </div>
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.4</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">&bull; Two email addresses &mdash; Work &amp; Personal<br>&bull; Popup lets you choose which to send to each time<br>&bull; Email address labels shown in picker</div>
+        </div>
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.3</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">• Fixed large gap at top of screen<br>• Topbar now respects iPhone safe area properly</div>
+        </div>
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.2</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">• Save Receipt &amp; Save to Photos buttons side by side<br>• Cleaner scan footer layout</div>
+        </div>
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.1</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">• Save to Photos button — saves receipt image to iPhone camera roll<br>• Save button on every history receipt</div>
+        </div>
+        <div class="v-row">
           <div class="v-header"><span class="v-num">v3.0</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Complete rewrite — removed Google Drive<br>• Email receipts directly from the app<br>• Complete Trip &amp; Email all receipts at once<br>• Email single receipts as one-offs<br>• Light &amp; dark mode<br>• Cleaner, simpler design — no login required</div>
+          <div class="v-notes">• Complete rebuild — removed Google Drive &amp; OAuth<br>• Receipts saved locally on device<br>• Email receipts one at a time or full trip at once<br>• Light &amp; dark mode<br>• Settings screen with email &amp; clear data</div>
         </div>
         <div class="v-row">
           <div class="v-header"><span class="v-num">v1.0 – v2.0</span><span class="v-date">April 2026</span></div>
@@ -228,7 +262,7 @@
   <div class="topbar">
     <div>
       <div class="topbar-title">🧾 ReceiptScan</div>
-      <div class="topbar-sub" id="scan-sub">v3.0</div>
+      <div class="topbar-sub" id="scan-sub">v3.4</div>
     </div>
     <button class="btn-icon btn" onclick="openSettings()">⚙️</button>
   </div>
@@ -284,11 +318,11 @@
     <div style="height:8px;flex-shrink:0"></div>
   </div>
   <div class="scan-footer">
-    <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled>Save Receipt</button>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-blue btn-sm" id="email-one-btn" onclick="emailOne()" disabled style="flex:1">📧 Email This Receipt</button>
-      <button class="btn btn-ghost btn-sm" onclick="clearForm()" style="flex:0 0 auto;padding:10px 14px;width:auto">Clear</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled style="flex:1">Save Receipt</button>
+      <button class="btn btn-secondary" id="save-photo-btn" onclick="saveToPhotos(null)" disabled style="flex:1">🖼 Save to Photos</button>
     </div>
+    <button class="btn btn-ghost btn-sm" onclick="clearForm()">Clear</button>
   </div>
   <div class="tabbar">
     <button class="tab active" id="t-scan" onclick="showTab('scan')">
@@ -403,14 +437,16 @@ function applyTheme(){
 function toggleDark(){ isDark=!isDark; applyTheme() }
 
 function openSettings(){
-  document.getElementById('inp-email').value=localStorage.getItem('email')||'';
+  document.getElementById('inp-email-work').value=localStorage.getItem('emailWork')||'';
+  document.getElementById('inp-email-personal').value=localStorage.getItem('emailPersonal')||'';
   const t=document.getElementById('dark-toggle');
   if(t) t.classList.toggle('on',isDark);
   document.getElementById('settings-overlay').classList.add('show');
 }
 function closeSettings(){ document.getElementById('settings-overlay').classList.remove('show') }
 function saveSettings(){
-  localStorage.setItem('email',document.getElementById('inp-email').value.trim());
+  localStorage.setItem('emailWork',document.getElementById('inp-email-work').value.trim());
+  localStorage.setItem('emailPersonal',document.getElementById('inp-email-personal').value.trim());
   localStorage.setItem('darkMode',isDark);
   applyTheme();
   closeSettings();
@@ -459,8 +495,16 @@ function fname(){
 function onChange(){
   const ready=imgB64&&document.getElementById('f-vendor').value.trim()&&catName;
   const bar=document.getElementById('fname-bar');
-  if(ready){ bar.textContent=fname(); bar.style.display='block'; document.getElementById('save-btn').disabled=false; document.getElementById('email-one-btn').disabled=false }
-  else{ bar.style.display='none'; document.getElementById('save-btn').disabled=true; document.getElementById('email-one-btn').disabled=true }
+  if(ready){
+    bar.textContent='📄 '+fname();
+    bar.style.display='block';
+    document.getElementById('save-btn').disabled=false;
+    document.getElementById('save-photo-btn').disabled=false;
+  } else {
+    bar.style.display='none';
+    document.getElementById('save-btn').disabled=true;
+    document.getElementById('save-photo-btn').disabled=true;
+  }
 }
 function today(){ return new Date().toISOString().split('T')[0] }
 function clearForm(){
@@ -472,43 +516,119 @@ function clearForm(){
   document.getElementById('cam-ph').style.display='flex';
   document.getElementById('fname-bar').style.display='none';
   document.getElementById('save-btn').disabled=true;
-  document.getElementById('email-one-btn').disabled=true;
+  document.getElementById('save-photo-btn').disabled=true;
 }
 function resetAndScan(){ clearForm(); showTab('scan') }
 
+// Save photo to iPhone camera roll
+// Uses a hidden anchor download trick — on iPhone Safari this saves to Photos
+function saveToPhotos(entryId){
+  let dataUrl, filename, trip;
+  if(entryId){
+    // Called from history
+    const entry=hist.find(h=>h.id===entryId);
+    if(!entry){toast('Receipt not found');return}
+    dataUrl=entry.img||entry.thumb;
+    filename=entry.filename||'receipt.jpg';
+    trip=entry.trip;
+  } else {
+    // Called from scan screen (current image)
+    if(!imgB64){toast('No photo to save');return}
+    dataUrl='data:image/jpeg;base64,'+imgB64;
+    filename=fname();
+    trip=activeTrip;
+  }
+  if(!dataUrl){toast('No image available');return}
+
+  // Create a temporary download link
+  const a=document.createElement('a');
+  a.href=dataUrl;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Show helpful tip
+  const albumMsg=trip?` Look for it in your Photos to add to the "${trip}" album.`:'';
+  toast('Photo saved to your Photos library!'+albumMsg);
+}
+
 function makeEntry(){
-  return { id:Date.now(), vendor:document.getElementById('f-vendor').value||'Unknown', date:document.getElementById('f-date').value||today(), amount:document.getElementById('f-amount').value||'', category:catName||'Other', trip:activeTrip||null, filename:fname(), thumb:'data:image/jpeg;base64,'+imgB64 };
+  return { id:Date.now(), vendor:document.getElementById('f-vendor').value||'Unknown', date:document.getElementById('f-date').value||today(), amount:document.getElementById('f-amount').value||'', category:catName||'Other', trip:activeTrip||null, filename:fname(), thumb:'data:image/jpeg;base64,'+imgB64, img:'data:image/jpeg;base64,'+imgB64 };
 }
 function saveReceipt(){
   const entry=makeEntry();
   hist.unshift(entry);
-  localStorage.setItem('rh',JSON.stringify(hist.slice(0,500)));
-  document.getElementById('suc-title').textContent='Receipt Saved!';
-  document.getElementById('suc-sub').textContent=entry.vendor+(entry.amount?' · '+entry.amount:'')+(entry.trip?' · Trip: '+entry.trip:'');
-  showScreen('success-screen');
+  localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
+  toast('Receipt saved! Tap 🖼 Save to Photos to add to your camera roll.');
+  clearForm();
+  updateBanner();
+}
+
+// ── Email Picker ───────────────────────────────────────────────────────────────
+let pendingEmailAction=null; // stores {type:'single'|'trip', id, tripName}
+
+function showEmailPicker(action, subText){
+  const work=localStorage.getItem('emailWork')||'';
+  const personal=localStorage.getItem('emailPersonal')||'';
+  if(!work&&!personal){ openSettings(); toast('Add your email addresses in Settings first'); return }
+  pendingEmailAction=action;
+  // Show/hide buttons based on what's configured
+  const wb=document.getElementById('picker-work-btn');
+  const pb=document.getElementById('picker-personal-btn');
+  wb.style.display=work?'flex':'none';
+  pb.style.display=personal?'flex':'none';
+  // Update labels to show actual addresses
+  wb.textContent='💼 Work — '+work;
+  pb.textContent='🏠 Personal — '+personal;
+  document.getElementById('picker-sub').textContent=subText||'Choose which email to send to';
+  document.getElementById('email-picker').classList.add('show');
+}
+
+function closeEmailPicker(){
+  document.getElementById('email-picker').classList.remove('show');
+  pendingEmailAction=null;
+}
+
+function sendToEmail(type){
+  const email=localStorage.getItem(type==='work'?'emailWork':'emailPersonal')||'';
+  if(!email){ toast('No '+type+' email saved'); return }
+  closeEmailPicker();
+  if(!pendingEmailAction) return;
+  const action=pendingEmailAction;
+  pendingEmailAction=null;
+  if(action.type==='single'){
+    const r=action.entry;
+    const subject=encodeURIComponent('Receipt: '+r.vendor+(r.amount?' '+r.amount:'')+' — '+r.date);
+    const body=encodeURIComponent('Receipt Details\n\nVendor:   '+r.vendor+'\nDate:     '+r.date+'\nAmount:   '+(r.amount||'—')+'\nCategory: '+r.category+(r.trip?'\nTrip:     '+r.trip:'')+'\n\nNote: Attach the receipt image from your camera roll.');
+    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  } else if(action.type==='trip'){
+    const receipts=hist.filter(r=>r.trip===action.tripName);
+    const total=receipts.reduce((s,r)=>{ const n=parseFloat((r.amount||'').replace(/[^0-9.]/g,'')); return s+(isNaN(n)?0:n) },0);
+    const subject=encodeURIComponent('Trip Complete: '+action.tripName+' — $'+total.toFixed(2));
+    const lines=receipts.map((r,i)=>`${i+1}. ${r.date}  ${r.vendor}  ${r.amount||'—'}  (${r.category})`).join('\n');
+    const body=encodeURIComponent('TRIP RECEIPT SUMMARY\n'+'='.repeat(35)+'\nTrip:     '+action.tripName+'\nReceipts: '+receipts.length+'\nTotal:    $'+total.toFixed(2)+'\n\nITEMIZED LIST\n'+'-'.repeat(35)+'\n'+lines+'\n\nNote: Attach receipt images from your camera roll.');
+    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  }
 }
 
 function emailOne(){
-  const email=localStorage.getItem('email')||'';
-  if(!email){ openSettings(); toast('Add your email address first'); return }
   const entry=makeEntry();
   hist.unshift(entry);
   localStorage.setItem('rh',JSON.stringify(hist.slice(0,500)));
-  const subject=encodeURIComponent('Receipt: '+entry.vendor+' '+entry.amount+' — '+entry.date);
-  const body=encodeURIComponent('Receipt Details\n\nVendor:   '+entry.vendor+'\nDate:     '+entry.date+'\nAmount:   '+(entry.amount||'—')+'\nCategory: '+entry.category+(entry.trip?'\nTrip:     '+entry.trip:'')+'\nFile:     '+entry.filename+'\n\nNote: The receipt image is saved on your device in the app History tab.');
-  window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  showEmailPicker({type:'single',entry},'Send this receipt to...');
+}
+
+function emailSingleReceipt(id){
+  const entry=hist.find(h=>h.id===id);
+  if(!entry){ toast('Receipt not found'); return }
+  showEmailPicker({type:'single',entry},'Send this receipt to...');
 }
 
 function emailTrip(tripName){
-  const email=localStorage.getItem('email')||'';
-  if(!email){ openSettings(); toast('Add your email address first'); return }
   const receipts=hist.filter(r=>r.trip===tripName);
   if(!receipts.length){ toast('No receipts saved for this trip yet'); return }
-  const total=receipts.reduce((s,r)=>{ const n=parseFloat((r.amount||'').replace(/[^0-9.]/g,'')); return s+(isNaN(n)?0:n) },0);
-  const subject=encodeURIComponent('Trip Complete: '+tripName+' — $'+total.toFixed(2));
-  const lines=receipts.map((r,i)=>`${i+1}. ${r.date}  ${r.vendor}  ${r.amount||'—'}  ${r.category}`).join('\n');
-  const body=encodeURIComponent('TRIP RECEIPT SUMMARY\n'+'='.repeat(35)+'\nTrip:     '+tripName+'\nReceipts: '+receipts.length+'\nTotal:    $'+total.toFixed(2)+'\n\n'+'ITEMIZED LIST\n'+'-'.repeat(35)+'\n'+lines+'\n\nNote: Receipt images are stored on your device in the app History tab.');
-  window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  showEmailPicker({type:'trip',tripName},'Send trip summary to...');
 }
 
 function createTrip(){
@@ -548,7 +668,7 @@ function updateBanner(){
     banner.classList.add('no-trip');
     nameEl.className='trip-name none'; nameEl.textContent='No active trip';
     labelEl.textContent='Tap to select or create a trip';
-    document.getElementById('scan-sub').textContent='v3.0 — One-off receipts';
+    document.getElementById('scan-sub').textContent='v3.4';
   }
 }
 function renderTrips(){
@@ -567,7 +687,7 @@ function renderHist(){
   document.getElementById('hist-count').textContent=hist.length+' receipt'+(hist.length!==1?'s':'');
   const b=document.getElementById('hist-body');
   if(!hist.length){ b.innerHTML='<div class="no-items" style="padding:60px 20px"><div style="font-size:36px">🧾</div><div>No receipts yet</div></div>'; return }
-  b.innerHTML=hist.map(r=>'<div class="r-item"><div class="r-thumb">'+(r.thumb?'<img src="'+r.thumb+'" loading="lazy">':'📄')+'</div><div class="r-info"><div class="r-vendor">'+r.vendor+'</div><div class="r-meta">'+r.date+' · '+r.category+(r.trip?' · ✈️ '+r.trip:'')+'</div></div><div class="r-amt">'+(r.amount||'—')+'</div></div>').join('');
+  b.innerHTML=hist.map(r=>'<div class="r-item"><div class="r-thumb">'+(r.thumb?'<img src="'+r.thumb+'" loading="lazy">':'📄')+'</div><div class="r-info"><div class="r-vendor">'+r.vendor+'</div><div class="r-meta">'+r.date+' · '+r.category+(r.trip?' · ✈️ '+r.trip:'')+'</div></div><div class="r-right"><div class="r-amt">'+(r.amount||'—')+'</div><div style="display:flex;gap:6px;margin-top:4px"><button class="r-email-btn" onclick="emailSingleReceipt('+r.id+')">📧 Email</button><button class="r-email-btn" style="background:var(--accent-light);color:var(--accent)" onclick="saveToPhotos('+r.id+')">🖼 Save</button></div></div></div>').join('');
 }
 
 function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2400) }
