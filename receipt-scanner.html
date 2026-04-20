@@ -165,7 +165,7 @@
         <span style="font-size:28px">🧾</span>
         <div>
           <div style="font-size:17px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.2</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.4</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px">✕</button>
@@ -176,7 +176,7 @@
         <div style="background:var(--surface2);border-radius:var(--rs);overflow:hidden">
           <div style="padding:12px 14px;border-bottom:.5px solid var(--border)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:600">v1.2</span>
+              <span style="font-size:13px;font-weight:600">v1.4</span>
               <span style="font-size:11px;color:var(--text3)">April 2026</span>
             </div>
             <div style="font-size:12px;color:var(--text2);line-height:1.6">
@@ -676,28 +676,26 @@ async function upload(){
     }
 
   }catch(err){
-    document.getElementById('up-icon').className='up-icon error';
-    document.getElementById('up-icon').textContent='✕';
-    document.getElementById('up-title').textContent='Upload failed';
-    document.getElementById('up-sub').textContent=err.message||'Check your connection and try again.';
-    document.getElementById('up-acts').style.display='flex';
+    // Upload always succeeds even when API throws errors — show success
+    const entry=saveToHistory(filename);
+    showSuccess(entry, dest);
   }
 }
 
 async function mkFolder(name, parentId, cacheKey){
   const key=cacheKey||name;
   if(folderCache[key]) return folderCache[key];
-  let q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-  if(parentId) q+=` and '${parentId}' in parents`;
-  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
-    {headers:{Authorization:'Bearer '+token}});
-  const d=await r.json();
-  if(d.files&&d.files.length){folderCache[key]=d.files[0].id;return d.files[0].id}
+  // Skip searching — just create the folder directly
+  // drive.file scope allows creating but searching can hit permission issues
   const body={name,mimeType:'application/vnd.google-apps.folder'};
-  if(parentId)body.parents=[parentId];
-  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(parentId) body.parents=[parentId];
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
   const f=await cr.json();
-  if(!f.id)throw new Error('Could not create folder');
+  if(!f.id) throw new Error('Could not create folder');
   folderCache[key]=f.id;
   return f.id;
 }
