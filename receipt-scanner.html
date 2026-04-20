@@ -165,7 +165,7 @@
         <span style="font-size:28px">🧾</span>
         <div>
           <div style="font-size:17px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.6</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.7</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px">✕</button>
@@ -176,15 +176,36 @@
         <div style="background:var(--surface2);border-radius:var(--rs);overflow:hidden">
           <div style="padding:12px 14px;border-bottom:.5px solid var(--border)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:600">v1.5</span>
+              <span style="font-size:13px;font-weight:600">v1.7</span>
               <span style="font-size:11px;color:var(--text3)">April 2026</span>
             </div>
             <div style="font-size:12px;color:var(--text2);line-height:1.6">
-              • Fixed false upload error on successful saves<br>
-              • Improved Google Drive folder caching<br>
-              • Camera zone now opens camera directly<br>
+              • Switched to resumable upload method<br>
+              • Fixed persistent quota exceeded error<br>
+              • Fixed version log
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-bottom:.5px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:600">v1.6</span>
+              <span style="font-size:11px;color:var(--text3)">April 2026</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">
+              • Broadened Google OAuth scope<br>
+              • Added step-by-step upload diagnostics
+            </div>
+          </div>
+          <div style="padding:12px 14px;border-bottom:.5px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:600">v1.1 – v1.5</span>
+              <span style="font-size:11px;color:var(--text3)">April 2026</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">
+              • Camera zone opens camera directly<br>
               • Scan Doc &amp; Library as separate buttons<br>
-              • Added About screen with version notes
+              • Added About screen<br>
+              • Trip folder organization<br>
+              • Various upload error fixes
             </div>
           </div>
           <div style="padding:12px 14px;border-top:.5px solid var(--border)">
@@ -694,23 +715,40 @@ async function getOrMakeFolder(name, parentId){
 }
 
 async function uploadFile(blob, filename, folderId){
+  // Step 1: initiate resumable upload session
   const meta=JSON.stringify({name:filename,parents:[folderId]});
-  const bnd='rb_'+Date.now();
-  const body=new Blob([
-    `--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,
-    `--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,
-    blob,
-    `\r\n--${bnd}--`
-  ],{type:`multipart/related; boundary=${bnd}`});
-  const r=await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-    {method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},body}
+  const initRes=await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
+    {
+      method:'POST',
+      headers:{
+        Authorization:'Bearer '+token,
+        'Content-Type':'application/json',
+        'X-Upload-Content-Type':'image/jpeg',
+        'X-Upload-Content-Length':blob.size
+      },
+      body:meta
+    }
   );
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error('FILE UPLOAD FAILED ('+r.status+'): '+(e.error?.message||JSON.stringify(e)));
+  if(!initRes.ok){
+    const e=await initRes.json().catch(()=>({}));
+    throw new Error('INIT FAILED ('+initRes.status+'): '+(e.error?.message||JSON.stringify(e)));
   }
-  return r.json();
+  // Step 2: get the upload URL from the Location header
+  const uploadUrl=initRes.headers.get('Location');
+  if(!uploadUrl) throw new Error('No upload URL returned from Google');
+
+  // Step 3: upload the actual file bytes
+  const uploadRes=await fetch(uploadUrl,{
+    method:'PUT',
+    headers:{'Content-Type':'image/jpeg','Content-Length':blob.size},
+    body:blob
+  });
+  if(!uploadRes.ok){
+    const e=await uploadRes.json().catch(()=>({}));
+    throw new Error('UPLOAD FAILED ('+uploadRes.status+'): '+(e.error?.message||JSON.stringify(e)));
+  }
+  return true;
 }
 function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
