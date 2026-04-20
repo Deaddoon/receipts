@@ -165,7 +165,7 @@
         <span style="font-size:28px">🧾</span>
         <div>
           <div style="font-size:17px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.5</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.5d</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px">✕</button>
@@ -622,7 +622,7 @@ async function upload(){
   document.getElementById('up-icon').className='up-icon loading';
   document.getElementById('up-icon').textContent='⏳';
   document.getElementById('up-title').textContent='Uploading…';
-  document.getElementById('up-sub').textContent='Saving to Google Drive…';
+  document.getElementById('up-sub').textContent='Step 1: Finding folder…';
   document.getElementById('up-acts').style.display='none';
 
   const filename=fname();
@@ -630,17 +630,16 @@ async function upload(){
   const dest=activeTrip ? mainFolder+' / '+activeTrip : mainFolder;
 
   try{
-    // Step 1: create main folder (cached after first time)
+    document.getElementById('up-sub').textContent='Step 1: Finding main folder…';
     const mainId=await getOrMakeFolder(mainFolder, null);
 
-    // Step 2: create trip subfolder if needed (cached after first time)
+    document.getElementById('up-sub').textContent='Step 2: '+(activeTrip?'Finding trip folder…':'Uploading file…');
     const targetId=activeTrip ? await getOrMakeFolder(activeTrip, mainId) : mainId;
 
-    // Step 3: upload image file
+    document.getElementById('up-sub').textContent='Step 3: Uploading image…';
     const blob=imgBlob||b64blob(imgB64,'image/jpeg');
     await uploadFile(blob, filename, targetId);
 
-    // Success
     const entry=saveToHistory(filename);
     showSuccess(entry, dest);
 
@@ -668,7 +667,7 @@ async function getOrMakeFolder(name, parentId){
   );
   if(!searchRes.ok){
     const e=await searchRes.json().catch(()=>({}));
-    throw new Error(e.error?.message||'Folder search failed ('+searchRes.status+')');
+    throw new Error('SEARCH FAILED ('+searchRes.status+'): '+(e.error?.message||JSON.stringify(e)));
   }
   const searchData=await searchRes.json();
   if(searchData.files&&searchData.files.length>0){
@@ -686,7 +685,7 @@ async function getOrMakeFolder(name, parentId){
   });
   if(!createRes.ok){
     const e=await createRes.json().catch(()=>({}));
-    throw new Error(e.error?.message||'Folder creation failed ('+createRes.status+')');
+    throw new Error('CREATE FOLDER FAILED ('+createRes.status+'): '+(e.error?.message||JSON.stringify(e)));
   }
   const folder=await createRes.json();
   if(!folder.id) throw new Error('Folder created but no ID returned');
@@ -709,7 +708,7 @@ async function uploadFile(blob, filename, folderId){
   );
   if(!r.ok){
     const e=await r.json().catch(()=>({}));
-    throw new Error(e.error?.message||'File upload failed ('+r.status+')');
+    throw new Error('FILE UPLOAD FAILED ('+r.status+'): '+(e.error?.message||JSON.stringify(e)));
   }
   return r.json();
 }
