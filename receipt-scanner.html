@@ -130,6 +130,7 @@
   .toast.show{opacity:1}
   #file-input{display:none}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -165,7 +166,7 @@
         <span style="font-size:28px">🧾</span>
         <div>
           <div style="font-size:17px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.8</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Version 1.9</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px">✕</button>
@@ -470,88 +471,29 @@ function showTab(t){
 }
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
-// ── Auth (PKCE flow — replaces deprecated implicit flow) ──────────────────────
-function generateRandom(len){
-  const arr=new Uint8Array(len);
-  crypto.getRandomValues(arr);
-  return Array.from(arr,b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-async function sha256(plain){
-  const enc=new TextEncoder().encode(plain);
-  const hash=await crypto.subtle.digest('SHA-256',enc);
-  return hash;
-}
-
-function base64urlencode(buf){
-  return btoa(String.fromCharCode(...new Uint8Array(buf)))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-
-async function connectGoogle(){
+// ── Auth (Google Identity Services — modern browser OAuth) ───────────────────
+function connectGoogle(){
   const c=cfg();
   if(!c.clientId){openSetup();toast('Enter your Google Client ID first');return}
-
-  // Generate PKCE code verifier and challenge
-  const verifier=generateRandom(32);
-  const hashed=await sha256(verifier);
-  const challenge=base64urlencode(hashed);
-
-  // Store verifier to use after redirect
-  sessionStorage.setItem('pkce_verifier',verifier);
-
-  const p=new URLSearchParams({
+  // Use Google Identity Services tokenClient
+  if(!window.google){toast('Google library loading, try again in a moment');return}
+  const client=google.accounts.oauth2.initTokenClient({
     client_id:c.clientId,
-    redirect_uri:location.origin+location.pathname,
-    response_type:'code',
     scope:'https://www.googleapis.com/auth/drive.file',
-    code_challenge:challenge,
-    code_challenge_method:'S256',
-    access_type:'online',
-    prompt:'consent'
+    callback:(resp)=>{
+      if(resp.error){toast('Auth error: '+resp.error);return}
+      token=resp.access_token;
+      folderCache={};
+      updateBanner();
+      showScreen('scan-screen');
+    }
   });
-  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
+  client.requestAccessToken();
 }
 
-async function checkAuth(){
-  const params=new URLSearchParams(location.search);
-  const code=params.get('code');
-
-  if(code){
-    window.history.replaceState({},'',location.pathname);
-    const verifier=sessionStorage.getItem('pkce_verifier');
-    if(!verifier){showScreen('auth-screen');toast('Auth error — please try again');return}
-
-    const c=cfg();
-    try{
-      const res=await fetch('https://oauth2.googleapis.com/token',{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:new URLSearchParams({
-          client_id:c.clientId,
-          redirect_uri:location.origin+location.pathname,
-          grant_type:'authorization_code',
-          code,
-          code_verifier:verifier
-        })
-      });
-      const data=await res.json();
-      if(data.access_token){
-        token=data.access_token;
-        sessionStorage.removeItem('pkce_verifier');
-        folderCache={};
-        updateBanner();
-        showScreen('scan-screen');
-      } else {
-        throw new Error(data.error_description||'Token exchange failed');
-      }
-    } catch(err){
-      toast('Auth failed: '+err.message);
-      showScreen('auth-screen');
-    }
-  } else {
-    showScreen('auth-screen');
-  }
+function checkAuth(){
+  // GIS handles auth via popup — just show auth screen on load
+  showScreen('auth-screen');
 }
 
 // ── Camera ─────────────────────────────────────────────────────────────────────
