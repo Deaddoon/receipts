@@ -193,16 +193,21 @@
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveSettings()">Save</button>
     </div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px;font-size:12px;color:var(--text3)" onclick="saveSettings();window.location.reload(true)">↺ Check for Update</button>
     <div style="margin-top:20px;border-top:.5px solid var(--border);padding-top:16px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <span style="font-size:24px">🧾</span>
         <div>
           <div style="font-size:15px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 3.7</div>
+          <div style="font-size:11px;color:var(--text3)">Version 3.8</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Version History</div>
       <div class="v-card">
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.8</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">&bull; Added Check for Update button in Settings</div>
+        </div>
         <div class="v-row">
           <div class="v-header"><span class="v-num">v3.7</span><span class="v-date">April 2026</span></div>
           <div class="v-notes">&bull; Removed Camera button — Notes + Library only<br>&bull; Main zone now opens Library</div>
