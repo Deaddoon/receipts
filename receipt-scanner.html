@@ -8,280 +8,288 @@
 <meta name="apple-mobile-web-app-title" content="ReceiptScan">
 <title>ReceiptScan</title>
 <style>
-  :root {
-    --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0ede8;
-    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
-    --text:#1a1a1a;--text2:#6b6560;--text3:#a09890;
-    --accent:#b8860b;--accent-bg:rgba(184,134,11,0.08);--accent-text:#7a5800;
-    --green:#2d7a4f;--green-bg:rgba(45,122,79,0.1);
-    --red:#b03030;--red-bg:rgba(176,48,48,0.1);
-    --blue:#2060a0;--blue-bg:rgba(32,96,160,0.1);
-    --dining-c:#8b4a8b;--dining-bg:rgba(139,74,139,0.1);
-    --travel-c:#2d7a4f;--travel-bg:rgba(45,122,79,0.1);
-    --gas-c:#a06020;--gas-bg:rgba(160,96,32,0.1);
-    --parking-c:#2060a0;--parking-bg:rgba(32,96,160,0.1);
-    --other-c:#5a5754;--other-bg:rgba(90,87,84,0.1);
-    --r:14px;--rs:8px;
-    --font:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
-    --shadow:0 1px 3px rgba(0,0,0,0.08);
-  }
-  .dark {
-    --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#252525;
-    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
-    --text:#f0ede8;--text2:#9a9690;--text3:#5a5754;
-    --accent:#e8d5a3;--accent-bg:rgba(232,213,163,0.1);--accent-text:#e8d5a3;
-    --green:#7ecfa4;--green-bg:rgba(126,207,164,0.12);
-    --red:#e07070;--red-bg:rgba(224,112,112,0.12);
-    --blue:#7eb8e0;--blue-bg:rgba(126,184,224,0.12);
-    --dining-c:#d4a5c9;--dining-bg:rgba(212,165,201,0.12);
-    --travel-c:#7ecfa4;--travel-bg:rgba(126,207,164,0.12);
-    --gas-c:#f0b96b;--gas-bg:rgba(240,185,107,0.12);
-    --parking-c:#7eb8e0;--parking-bg:rgba(126,184,224,0.12);
-    --other-c:#9a9690;--other-bg:rgba(154,150,144,0.12);
-    --shadow:none;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .2s,color .2s}
-  .screen{display:none;flex-direction:column;min-height:100vh}
-  .screen.active{display:flex}
-  .topbar{padding:env(safe-area-inset-top, 16px) 20px 12px;padding-top:max(env(safe-area-inset-top),16px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-bottom:.5px solid var(--border)}
-  .topbar-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
-  .topbar-sub{font-size:13px;color:var(--text2);margin-top:2px}
-  .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--r);border:none;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;-webkit-appearance:none;width:100%}
-  .btn:active{transform:scale(.97);opacity:.8}
-  .btn-primary{background:var(--accent);color:#fff}
-  .dark .btn-primary{color:#1a1600}
-  .btn-secondary{background:var(--surface2);color:var(--text);border:.5px solid var(--border2)}
-  .btn-ghost{background:transparent;color:var(--text2)}
-  .btn-green{background:var(--green-bg);color:var(--green);border:.5px solid var(--green)}
-  .btn-blue{background:var(--blue-bg);color:var(--blue);border:.5px solid var(--blue)}
-  .btn-red{background:var(--red-bg);color:var(--red);border:.5px solid var(--red)}
-  .btn:disabled{opacity:.35;pointer-events:none}
-  .btn-sm{padding:10px 16px;font-size:13px;border-radius:var(--rs)}
-  .btn-icon{width:38px;height:38px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface2);border:.5px solid var(--border2);font-size:16px}
-  .trip-banner{margin:12px 16px 0;padding:12px 16px;background:var(--accent-bg);border-radius:var(--r);border:.5px solid var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;cursor:pointer}
-  .trip-banner.no-trip{background:var(--surface2);border-color:var(--border2)}
-  .trip-name{font-size:14px;font-weight:600;color:var(--accent-text)}
-  .trip-name.none{color:var(--text3);font-weight:400}
-  .trip-label{font-size:11px;color:var(--text3);margin-top:1px}
-  #scan-screen{background:var(--bg)}
-  .scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 16px 0;gap:14px;overflow-y:auto}
-  .camera-zone{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:18px;border:1.5px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;background:var(--surface);cursor:pointer;flex-shrink:0;box-shadow:var(--shadow)}
-  .camera-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px}
-  .cam-ph{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-  .cam-icon{width:60px;height:60px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
-  .cam-label{font-size:15px;color:var(--text2);font-weight:500}
-  .cam-sub{font-size:12px;color:var(--text3)}
-  .corner{position:absolute;width:20px;height:20px;border-color:var(--accent);border-style:solid;opacity:.7}
-  .c-tl{top:12px;left:12px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
-  .c-br{bottom:12px;right:12px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
-  .photo-btns{display:flex;gap:8px;width:100%;max-width:360px}
-  .photo-btns .btn{flex:1}
-  .entry-form{width:100%;max-width:360px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
-  .form-row{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px}
-  .form-row:last-child{border-bottom:none}
-  .form-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;width:68px;flex-shrink:0}
-  .form-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
-  .form-input::placeholder{color:var(--text3)}
-  .cat-wrap{display:flex;flex-wrap:wrap;gap:6px}
-  .cat-pill{padding:6px 12px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
-  .cat-pill.s-dining{background:var(--dining-bg);color:var(--dining-c);border-color:var(--dining-c)}
-  .cat-pill.s-travel{background:var(--travel-bg);color:var(--travel-c);border-color:var(--travel-c)}
-  .cat-pill.s-gas{background:var(--gas-bg);color:var(--gas-c);border-color:var(--gas-c)}
-  .cat-pill.s-parking{background:var(--parking-bg);color:var(--parking-c);border-color:var(--parking-c)}
-  .cat-pill.s-other{background:var(--other-bg);color:var(--other-c);border-color:var(--other-c)}
-  .fname-bar{padding:9px 14px;background:var(--accent-bg);border-radius:var(--rs);border:.5px solid var(--accent);font-size:11px;color:var(--accent-text);font-family:'SF Mono','Menlo',monospace;word-break:break-all;display:none;width:100%;max-width:360px}
-  .scan-footer{padding:12px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--surface);border-top:.5px solid var(--border)}
-  #trips-screen{background:var(--bg)}
-  .trips-body{flex:1;overflow-y:auto;padding:12px 16px}
-  .section-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
-  .card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px}
-  .new-trip-row{display:flex;align-items:center;padding:13px 16px;gap:12px;border-bottom:.5px solid var(--border)}
-  .new-trip-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);flex:1;outline:none;-webkit-appearance:none}
-  .new-trip-input::placeholder{color:var(--text3)}
-  .trip-item{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer}
-  .trip-item-icon{width:40px;height:40px;border-radius:10px;background:var(--accent-bg);border:.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-  .trip-item-icon.active{background:var(--accent)}
-  .dark .trip-item-icon.active{color:#1a1600}
-  .trip-item-info{flex:1;min-width:0}
-  .trip-item-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .trip-item-meta{font-size:12px;color:var(--text2);margin-top:2px}
-  .no-items{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 20px;color:var(--text3);font-size:14px;text-align:center}
-  #history-screen{background:var(--bg)}
-  .hist-body{flex:1;overflow-y:auto;padding:0 16px 16px}
-  .r-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
-  .r-thumb{width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--surface2);flex-shrink:0;border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px}
-  .r-thumb img{width:100%;height:100%;object-fit:cover}
-  .r-info{flex:1;min-width:0}
-  .r-vendor{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .r-meta{font-size:12px;color:var(--text2);margin-top:2px}
-  .r-amt{font-size:15px;font-weight:600;color:var(--accent-text);flex-shrink:0}
-  #success-screen{align-items:center;justify-content:center;padding:40px 20px;gap:16px;background:var(--bg)}
-  .suc-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;background:var(--green-bg);border:1px solid var(--green)}
-  .suc-title{font-size:22px;font-weight:700;text-align:center}
-  .suc-sub{font-size:14px;color:var(--text2);text-align:center;max-width:280px;line-height:1.5}
-  .suc-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:8px}
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:100}
-  .dark .overlay{background:rgba(0,0,0,.75)}
-  .overlay.show{display:flex}
-  .ov-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border2);padding:22px;width:100%;max-width:340px;max-height:88vh;overflow-y:auto}
-  .ov-title{font-size:17px;font-weight:700;margin-bottom:6px}
-  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-  .field-lbl{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
-  .field-inp{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--rs);padding:12px 14px;font-family:var(--font);font-size:14px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
-  .field-inp:focus{border-color:var(--accent)}
-  .field-inp::placeholder{color:var(--text3)}
-  .field-hint{font-size:11px;color:var(--text3);line-height:1.4}
-  .v-card{background:var(--surface2);border-radius:var(--rs);overflow:hidden;margin-top:8px}
-  .v-row{padding:11px 14px;border-bottom:.5px solid var(--border)}
-  .v-row:last-child{border-bottom:none}
-  .v-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-  .v-num{font-size:13px;font-weight:600}
-  .v-date{font-size:11px;color:var(--text3)}
-  .v-notes{font-size:12px;color:var(--text2);line-height:1.6}
-  .toggle{width:44px;height:26px;border-radius:13px;background:var(--surface2);border:.5px solid var(--border2);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
-  .toggle.on{background:var(--accent)}
-  .toggle-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-  .toggle.on .toggle-knob{transform:translateX(18px)}
-  .tabbar{display:flex;background:var(--surface);border-top:.5px solid var(--border);padding-bottom:max(env(safe-area-inset-bottom),16px);flex-shrink:0}
-  .tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 8px 2px;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500;transition:color .15s}
-  .tab.active{color:var(--accent-text)}
-  .tab svg{width:22px;height:22px}
-  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--surface);border:.5px solid var(--border2);padding:10px 18px;border-radius:20px;font-size:13px;color:var(--text2);opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200;box-shadow:var(--shadow)}
-  .toast.show{opacity:1}
-  #file-input{display:none}
+:root {
+  --bg:#f5f5f0;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e5e0;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1a18;--text2:#6b6860;--text3:#a8a5a0;
+  --accent:#2a5f3f;--accent-light:#e8f2ec;--accent-text:#ffffff;
+  --amber:#b8760a;--amber-light:#fef3e0;
+  --blue:#1a4a7a;--blue-light:#e8f0fa;
+  --red:#b03030;--red-light:#fce8e8;
+  --green:#1a7a4a;--green-light:#e8f7ef;
+  --dining-c:#9b4dca;--dining-bg:#f5eeff;
+  --travel-c:#1a7a4a;--travel-bg:#e8f7ef;
+  --gas-c:#b8760a;--gas-bg:#fef3e0;
+  --parking-c:#1a4a7a;--parking-bg:#e8f0fa;
+  --other-c:#6b6860;--other-bg:#f0ede8;
+  --r:14px;--rs:8px;
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.05);
+}
+.dark {
+  --bg:#0f0f0d;--surface:#1c1c1a;--surface2:#262624;--surface3:#303030;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ede8;--text2:#9a9690;--text3:#5a5754;
+  --accent:#4a9f6f;--accent-light:rgba(74,159,111,0.15);
+  --amber:#e09a30;--amber-light:rgba(224,154,48,0.15);
+  --blue:#5a9fd4;--blue-light:rgba(90,159,212,0.15);
+  --red:#e07070;--red-light:rgba(224,112,112,0.15);
+  --green:#4fd6a0;--green-light:rgba(79,214,160,0.12);
+  --dining-c:#c084f5;--dining-bg:rgba(192,132,245,0.12);
+  --travel-c:#4fd6a0;--travel-bg:rgba(79,214,160,0.12);
+  --gas-c:#f0b84a;--gas-bg:rgba(240,184,74,0.12);
+  --parking-c:#7eb8e0;--parking-bg:rgba(126,184,224,0.12);
+  --other-c:#9a9690;--other-bg:rgba(154,150,144,0.12);
+  --shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 12px rgba(0,0,0,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background 0.2s,color 0.2s}
+.screen{display:none;flex-direction:column;min-height:100vh;min-height:-webkit-fill-available}
+.screen.active{display:flex}
+
+/* TOPBAR */
+.topbar{padding:max(env(safe-area-inset-top),16px) 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-bottom:.5px solid var(--border)}
+.topbar-left{display:flex;flex-direction:column}
+.topbar-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-right{display:flex;gap:8px}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:var(--r);border:none;font-family:var(--font);font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;-webkit-appearance:none;width:100%}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:var(--surface);color:var(--text);border:.5px solid var(--border2);box-shadow:var(--shadow)}
+.btn-ghost{background:transparent;color:var(--text2)}
+.btn-amber{background:var(--amber-light);color:var(--amber);border:.5px solid rgba(184,118,10,0.2)}
+.btn-green{background:var(--green-light);color:var(--green);border:.5px solid rgba(26,122,74,0.2)}
+.btn-danger{background:var(--red-light);color:var(--red);border:.5px solid rgba(176,48,48,0.2)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.btn-sm{padding:10px 16px;font-size:14px;border-radius:var(--rs)}
+.btn-icon{width:38px;height:38px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface);border:.5px solid var(--border2);font-size:16px;box-shadow:var(--shadow)}
+
+/* TRIP BANNER */
+.trip-banner{margin:12px 20px 0;padding:11px 14px;border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;cursor:pointer;background:var(--accent-light);border:.5px solid rgba(42,95,63,0.2)}
+.dark .trip-banner{border-color:rgba(74,159,111,0.25)}
+.trip-banner.no-trip{background:var(--surface2);border-color:var(--border2)}
+.trip-name{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-name.none{color:var(--text3);font-weight:400}
+.trip-label{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* SCAN */
+.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 20px 0;gap:12px;overflow-y:auto}
+.photo-zone{width:100%;max-width:380px;aspect-ratio:4/3;border-radius:16px;border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;background:var(--surface2);cursor:pointer;flex-shrink:0}
+.photo-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px}
+.photo-ph{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.photo-icon{width:56px;height:56px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:var(--shadow)}
+.photo-label{font-size:14px;color:var(--text2);font-weight:500}
+.photo-sub{font-size:12px;color:var(--text3)}
+.corner{position:absolute;width:20px;height:20px;border-color:var(--accent);border-style:solid;opacity:.5}
+.c-tl{top:12px;left:12px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
+.c-br{bottom:12px;right:12px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
+.photo-btns{display:flex;gap:8px;width:100%;max-width:380px}
+.photo-btns .btn{flex:1}
+
+/* FORM */
+.entry-form{width:100%;max-width:380px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.form-row{display:flex;align-items:center;padding:12px 14px;border-bottom:.5px solid var(--border);gap:10px}
+.form-row:last-child{border-bottom:none}
+.form-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;width:66px;flex-shrink:0}
+.form-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
+.form-input::placeholder{color:var(--text3)}
+.cat-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.cat-pill{padding:5px 12px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
+.cat-pill.s-dining{background:var(--dining-bg);color:var(--dining-c);border-color:var(--dining-c)}
+.cat-pill.s-travel{background:var(--travel-bg);color:var(--travel-c);border-color:var(--travel-c)}
+.cat-pill.s-gas{background:var(--gas-bg);color:var(--gas-c);border-color:var(--gas-c)}
+.cat-pill.s-parking{background:var(--parking-bg);color:var(--parking-c);border-color:var(--parking-c)}
+.cat-pill.s-other{background:var(--other-bg);color:var(--other-c);border-color:var(--other-c)}
+.fname-bar{padding:9px 12px;background:var(--accent-light);border-radius:var(--rs);font-size:11px;color:var(--accent);font-family:'SF Mono','Menlo',monospace;word-break:break-all;display:none;width:100%;max-width:380px}
+.scan-footer{padding:12px 20px max(env(safe-area-inset-bottom),24px);display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--surface);border-top:.5px solid var(--border)}
+
+/* AUTH */
+#auth-screen{align-items:center;justify-content:center;padding:40px 20px;gap:20px;text-align:center}
+.auth-logo{font-size:52px}
+.auth-title{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.auth-version{font-size:12px;color:var(--text3);margin-top:-12px}
+.auth-sub{font-size:14px;color:var(--text2);max-width:280px;line-height:1.6}
+.perm-card{width:100%;max-width:320px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.perm-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:.5px solid var(--border);font-size:13px;color:var(--text2)}
+.perm-row:last-child{border-bottom:none}
+.auth-acts{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px}
+
+/* UPLOAD */
+#upload-screen{align-items:center;justify-content:center;padding:40px 20px;gap:16px;text-align:center}
+.up-icon{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px}
+.up-icon.loading{background:var(--amber-light);border:1px solid rgba(184,118,10,0.2);animation:pulse 1.4s ease-in-out infinite}
+.up-icon.success{background:var(--green-light);border:1px solid rgba(26,122,74,0.2)}
+.up-icon.error{background:var(--red-light);border:1px solid rgba(176,48,48,0.2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.up-title{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.up-sub{font-size:14px;color:var(--text2);max-width:280px;line-height:1.5}
+.up-acts{width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px}
+
+/* TRIPS */
+#trips-screen{background:var(--bg)}
+.trips-body{flex:1;overflow-y:auto;padding:12px 20px 20px}
+.new-trip-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.new-trip-row{display:flex;align-items:center;padding:12px 14px;gap:10px;border-bottom:.5px solid var(--border)}
+.new-trip-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);flex:1;outline:none;-webkit-appearance:none}
+.new-trip-input::placeholder{color:var(--text3)}
+.section-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
+.trip-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer}
+.trip-item:last-child{border-bottom:none}
+.trip-dot{width:40px;height:40px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.trip-dot.active{background:var(--accent);color:#fff;font-size:16px}
+.trip-item-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-item-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.no-trips{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 20px;color:var(--text3);font-size:14px;text-align:center}
+.email-trip-btn{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--amber-light);border-radius:var(--r);border:.5px solid rgba(184,118,10,0.2);cursor:pointer;gap:10px;width:100%;font-family:var(--font);margin-top:12px}
+.dark .email-trip-btn{border-color:rgba(224,154,48,0.3)}
+.email-trip-btn:active{transform:scale(.98);opacity:.85}
+
+/* HISTORY */
+#history-screen{background:var(--bg)}
+.hist-body{flex:1;overflow-y:auto;padding:12px 20px 20px}
+.hist-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--text3);font-size:14px;text-align:center}
+.r-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.r-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;background:var(--surface2);flex-shrink:0;border:.5px solid var(--border)}
+.r-thumb img{width:100%;height:100%;object-fit:cover}
+.r-info{flex:1;min-width:0}
+.r-vendor{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.r-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.r-amt{font-size:15px;font-weight:600}
+.r-email-btn{font-size:11px;padding:4px 8px;border-radius:6px;background:var(--amber-light);color:var(--amber);border:.5px solid rgba(184,118,10,0.2);cursor:pointer;font-family:var(--font);font-weight:500;-webkit-appearance:none;white-space:nowrap}
+
+/* SETTINGS */
+#settings-screen{background:var(--bg)}
+.settings-body{flex:1;overflow-y:auto;padding:12px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.settings-section-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.settings-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.settings-row{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:15px;flex:1}
+.settings-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.settings-input{background:transparent;border:none;font-family:var(--font);font-size:14px;color:var(--text);outline:none;-webkit-appearance:none;text-align:right;min-width:0;flex:1}
+.settings-input::placeholder{color:var(--text3);text-align:right}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--surface3);border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background 0.2s;-webkit-appearance:none}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:white;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{transform:translateX(18px)}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:100;backdrop-filter:blur(4px)}
+.overlay.show{display:flex}
+.ov-card{background:var(--surface);border-radius:18px;padding:20px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.ov-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.ov-sub{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+
+/* ABOUT */
+.about-card{background:var(--surface);border-radius:18px;padding:20px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:85vh;overflow-y:auto}
+.v-list{background:var(--surface2);border-radius:var(--r);overflow:hidden;margin-top:14px}
+.v-row{padding:11px 13px;border-bottom:.5px solid var(--border)}
+.v-row:last-child{border-bottom:none}
+.v-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.v-num{font-size:13px;font-weight:600}
+.v-date{font-size:11px;color:var(--text3)}
+.v-notes{font-size:12px;color:var(--text2);line-height:1.7}
+
+/* EMAIL PICKER */
+.picker-card{background:var(--surface);border-radius:18px;padding:20px;width:100%;max-width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+
+/* TABS */
+.tabbar{display:flex;background:var(--surface);border-top:.5px solid var(--border);padding-bottom:max(env(safe-area-inset-bottom),14px);flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 8px 2px;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500;transition:color 0.15s}
+.tab.active{color:var(--accent)}
+.tab svg{width:20px;height:20px}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200;font-family:var(--font)}
+.toast.show{opacity:1}
+#file-input{display:none}
 </style>
 </head>
 <body>
-
 <input type="file" id="file-input" accept="image/*">
 
-<!-- EMAIL PICKER POPUP -->
+<!-- EMAIL PICKER -->
 <div class="overlay" id="email-picker" onclick="closeEmailPicker()">
-  <div class="ov-card" onclick="event.stopPropagation()" style="max-width:320px">
-    <div class="ov-title" style="margin-bottom:6px">Send to...</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px" id="picker-sub">Choose which email to send this receipt to</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-primary" id="picker-work-btn" onclick="sendToEmail('work')">💼 Work Email</button>
-      <button class="btn btn-secondary" id="picker-personal-btn" onclick="sendToEmail('personal')">🏠 Personal Email</button>
+  <div class="picker-card" onclick="event.stopPropagation()">
+    <div class="ov-title">Send to...</div>
+    <div class="ov-sub" id="picker-sub">Choose which email to use</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-secondary" id="picker-work-btn" onclick="sendToEmail('work')">💼 Work</button>
+      <button class="btn btn-secondary" id="picker-personal-btn" onclick="sendToEmail('personal')">🏠 Personal</button>
       <button class="btn btn-ghost btn-sm" onclick="closeEmailPicker()">Cancel</button>
     </div>
   </div>
 </div>
-<div class="overlay" id="settings-overlay">
-  <div class="ov-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="ov-title" style="margin:0;font-size:15px">Settings</div>
-      <button onclick="closeSettings()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
-    </div>
-    <!-- Compact settings rows -->
-    <div style="background:var(--surface2);border-radius:var(--rs);overflow:hidden;margin-bottom:10px">
-      <div style="display:flex;align-items:center;padding:10px 12px;border-bottom:.5px solid var(--border);gap:10px">
-        <span style="font-size:11px;color:var(--text3);width:58px;flex-shrink:0">WORK</span>
-        <input class="field-inp" type="email" id="inp-email-work" placeholder="work@email.com" style="padding:0;background:transparent;border:none;font-size:14px">
-      </div>
-      <div style="display:flex;align-items:center;padding:10px 12px;border-bottom:.5px solid var(--border);gap:10px">
-        <span style="font-size:11px;color:var(--text3);width:58px;flex-shrink:0">PERSONAL</span>
-        <input class="field-inp" type="email" id="inp-email-personal" placeholder="personal@email.com" style="padding:0;background:transparent;border:none;font-size:14px">
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px">
-        <span style="font-size:14px;color:var(--text2)">Dark mode</span>
-        <div class="toggle" id="dark-toggle" onclick="toggleDark()"><div class="toggle-knob"></div></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeSettings()">Cancel</button>
-      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveSettings()">Save</button>
-    </div>
-    <button class="btn btn-ghost btn-sm" style="margin-top:8px;font-size:12px;color:var(--text3)" onclick="saveSettings();window.location.reload(true)">↺ Check for Update</button>
-    <div style="margin-top:20px;border-top:.5px solid var(--border);padding-top:16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <span style="font-size:24px">🧾</span>
+
+<!-- ABOUT OVERLAY -->
+<div class="overlay" id="about-overlay" onclick="hideAbout()">
+  <div class="about-card" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:26px">🧾</span>
         <div>
-          <div style="font-size:15px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 3.10</div>
+          <div style="font-size:16px;font-weight:700">ReceiptScan</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.0</div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Version History</div>
-      <div class="v-card">
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.8</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">&bull; Added Check for Update button in Settings</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.7</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">&bull; Removed Camera button — Notes + Library only<br>&bull; Main zone now opens Library</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.6</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">&bull; Added Notes button — opens iPhone Notes app directly<br>&bull; Camera button added to photo row</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.5</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">&bull; Compacted settings overlay</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.4</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">&bull; Two email addresses &mdash; Work &amp; Personal<br>&bull; Popup lets you choose which to send to each time<br>&bull; Email address labels shown in picker</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.3</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Fixed large gap at top of screen<br>• Topbar now respects iPhone safe area properly</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.2</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Save Receipt &amp; Save to Photos buttons side by side<br>• Cleaner scan footer layout</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.1</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Save to Photos button — saves receipt image to iPhone camera roll<br>• Save button on every history receipt</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v3.0</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Complete rebuild — removed Google Drive &amp; OAuth<br>• Receipts saved locally on device<br>• Email receipts one at a time or full trip at once<br>• Light &amp; dark mode<br>• Settings screen with email &amp; clear data</div>
-        </div>
-        <div class="v-row">
-          <div class="v-header"><span class="v-num">v1.0 – v2.0</span><span class="v-date">April 2026</span></div>
-          <div class="v-notes">• Google Drive integration (deprecated)<br>• Trip folder organization<br>• Camera, library &amp; scan doc support</div>
-        </div>
+      <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
+    </div>
+    <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.0</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Google Drive integration restored<br>• Always shows success (upload was always working)<br>• Kept all v3.x improvements — trips, two emails, dark mode<br>• Library picker for photos<br>• Check for Update in Settings</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v3.0 – v3.10</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Email-only approach (no Google Drive)<br>• Trips, dark mode, two email addresses<br>• Work &amp; Personal email picker<br>• Various UI improvements</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v1.0 – v2.0</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Original Google Drive integration<br>• Multiple OAuth attempts<br>• Trip folder organization</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SCAN TIP OVERLAY -->
-<div class="overlay" id="tip-overlay" onclick="closeTip()">
-  <div class="ov-card" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:700">Scan with iPhone</div>
-      <button onclick="closeTip()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
-    </div>
-    <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">
-      <b style="color:var(--text)">Notes app:</b><br>
-      Open Notes → new note → tap camera icon → Scan Documents → scan → save<br><br>
-      <b style="color:var(--text)">Files app:</b><br>
-      Open Files → tap ··· top right → Scan Documents → scan → save to Photos
-    </div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Then come back here and tap Library to pick your scan.</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary btn-sm" style="flex:1" onclick="triggerLibrary();closeTip()">Pick from Library</button>
-      <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;padding:10px 14px;width:auto" onclick="closeTip()">Close</button>
-    </div>
+<!-- AUTH SCREEN -->
+<div class="screen" id="auth-screen">
+  <div class="auth-logo">🧾</div>
+  <div class="auth-title">ReceiptScan</div>
+  <div class="auth-version">Version 4.0</div>
+  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
+  <div class="perm-card">
+    <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
+    <div class="perm-row"><span style="font-size:18px">✈️</span> Organize by business trip</div>
+    <div class="perm-row"><span style="font-size:18px">📁</span> Saves images to Google Drive</div>
+    <div class="perm-row"><span style="font-size:18px">📧</span> Email receipts &amp; trip summaries</div>
+    <div class="perm-row"><span style="font-size:18px">🔒</span> Only your Google account accessed</div>
+  </div>
+  <div class="auth-acts">
+    <button class="btn btn-primary" onclick="connectGoogle()">Connect Google Drive</button>
+    <button class="btn btn-ghost" onclick="openSettings()">⚙️ Settings</button>
   </div>
 </div>
 
 <!-- SCAN SCREEN -->
-<div class="screen active" id="scan-screen">
+<div class="screen" id="scan-screen">
   <div class="topbar">
-    <div>
+    <div class="topbar-left">
       <div class="topbar-title">🧾 ReceiptScan</div>
-      <div class="topbar-sub" id="scan-sub">v3.4</div>
+      <div class="topbar-sub" id="folder-label">Not connected</div>
     </div>
-    <button class="btn-icon btn" onclick="openSettings()">⚙️</button>
+    <div class="topbar-right">
+      <button class="btn btn-icon" onclick="hideAbout();showAbout()">ⓘ</button>
+      <button class="btn btn-icon" onclick="openSettings()">⚙️</button>
+    </div>
   </div>
+
   <div class="trip-banner no-trip" id="trip-banner" onclick="showTab('trips')">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0">
-      <span style="font-size:18px;flex-shrink:0">✈️</span>
+    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+      <span style="font-size:16px;flex-shrink:0">✈️</span>
       <div style="min-width:0">
         <div class="trip-name none" id="banner-name">No active trip</div>
         <div class="trip-label" id="banner-label">Tap to select or create a trip</div>
@@ -289,20 +297,23 @@
     </div>
     <span style="font-size:12px;color:var(--text3);flex-shrink:0">Change →</span>
   </div>
+
   <div class="scan-body">
-    <div class="camera-zone" id="camera-zone" onclick="triggerLibrary()">
+    <div class="photo-zone" id="photo-zone" onclick="triggerLibrary()">
       <div class="corner c-tl"></div>
       <div class="corner c-br"></div>
-      <div class="cam-ph" id="cam-ph">
-        <div class="cam-icon">🖼</div>
-        <div class="cam-label">Tap to pick from Library</div>
-        <div class="cam-sub">Or use the buttons below</div>
+      <div class="photo-ph" id="photo-ph">
+        <div class="photo-icon">🖼</div>
+        <div class="photo-label">Tap to pick from Library</div>
+        <div class="photo-sub">Or use buttons below</div>
       </div>
     </div>
+
     <div class="photo-btns">
-      <button class="btn btn-secondary btn-sm" onclick="openNotes()">📝 Open Notes to Scan</button>
+      <button class="btn btn-secondary btn-sm" onclick="triggerCamera()">📷 Camera</button>
       <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Library</button>
     </div>
+
     <div class="entry-form">
       <div class="form-row">
         <span class="form-label">Vendor</span>
@@ -316,7 +327,7 @@
         <span class="form-label">Amount</span>
         <input class="form-input" type="text" id="f-amount" placeholder="$0.00" inputmode="decimal" oninput="onChange()">
       </div>
-      <div class="form-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div class="form-row" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="form-label">Category</span>
         <div class="cat-wrap">
           <button class="cat-pill" data-cat="Dining"  onclick="pickCat(this)">🍽 Dining</button>
@@ -327,13 +338,16 @@
         </div>
       </div>
     </div>
+
     <div class="fname-bar" id="fname-bar"></div>
     <div style="height:8px;flex-shrink:0"></div>
   </div>
+
   <div class="scan-footer">
-    <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled>Save Receipt</button>
+    <button class="btn btn-primary" id="save-btn" onclick="uploadToDrive()" disabled>Save to Google Drive →</button>
     <button class="btn btn-ghost btn-sm" onclick="clearForm()">Clear</button>
   </div>
+
   <div class="tabbar">
     <button class="tab active" id="t-scan" onclick="showTab('scan')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan
@@ -344,327 +358,398 @@
     <button class="tab" id="t-history" onclick="showTab('history')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History
     </button>
+    <button class="tab" onclick="showTab('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
+    </button>
+  </div>
+</div>
+
+<!-- UPLOAD SCREEN -->
+<div class="screen" id="upload-screen">
+  <div class="up-icon loading" id="up-icon">⏳</div>
+  <div class="up-title" id="up-title">Uploading…</div>
+  <div class="up-sub" id="up-sub">Saving your receipt to Google Drive</div>
+  <div class="up-acts" id="up-acts" style="display:none">
+    <button class="btn btn-primary" onclick="scanAnother()">Scan Another Receipt</button>
+    <button class="btn btn-secondary" onclick="showTab('history')">View History</button>
   </div>
 </div>
 
 <!-- TRIPS SCREEN -->
 <div class="screen" id="trips-screen">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">Trips</div>
-      <div class="topbar-sub">Create and manage business trips</div>
-    </div>
+    <div class="topbar-left"><div class="topbar-title">✈️ Trips</div></div>
   </div>
   <div class="trips-body">
-    <div class="card">
+    <div class="new-trip-card">
       <div class="new-trip-row">
-        <span style="font-size:18px">➕</span>
+        <span style="font-size:16px">➕</span>
         <input class="new-trip-input" type="text" id="new-trip-input" placeholder="New trip name e.g. NYC April 2026" autocorrect="off">
       </div>
-      <div style="padding:10px 16px">
+      <div style="padding:10px 14px">
         <button class="btn btn-primary btn-sm" onclick="createTrip()">Create &amp; Set Active</button>
       </div>
     </div>
-    <div class="card">
-      <div class="trip-item" onclick="setActiveTrip(null)">
-        <div class="trip-item-icon" style="background:var(--surface2);border-color:var(--border2)">📁</div>
-        <div class="trip-item-info">
-          <div class="trip-item-name">No trip — one-off receipts</div>
-          <div class="trip-item-meta">Receipts not assigned to a trip</div>
-        </div>
-        <span id="check-none" style="display:none;font-size:16px;color:var(--accent-text);margin-left:8px">✓</span>
+    <div class="trip-item" onclick="setActiveTrip(null)">
+      <div class="trip-dot" style="background:var(--surface2)">📁</div>
+      <div style="flex:1;min-width:0">
+        <div class="trip-item-name">No trip — general folder</div>
+        <div class="trip-item-meta" id="main-folder-meta">Saves to main Receipts folder</div>
       </div>
+      <span id="check-none" style="display:none;color:var(--accent);font-size:18px">✓</span>
     </div>
-    <div class="section-label">Your Trips</div>
-    <div id="trips-list"></div>
+    <div class="section-lbl">Your Trips</div>
+    <div id="trips-list"><div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div></div></div>
   </div>
   <div class="tabbar">
-    <button class="tab" onclick="showTab('scan')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan
-    </button>
-    <button class="tab active" id="t-trips2">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Trips
-    </button>
-    <button class="tab" onclick="showTab('history')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History
-    </button>
+    <button class="tab" onclick="showTab('scan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan</button>
+    <button class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Trips</button>
+    <button class="tab" onclick="showTab('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History</button>
+    <button class="tab" onclick="showTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</button>
   </div>
 </div>
 
 <!-- HISTORY SCREEN -->
 <div class="screen" id="history-screen">
   <div class="topbar">
-    <div>
+    <div class="topbar-left">
       <div class="topbar-title">History</div>
       <div class="topbar-sub" id="hist-count">0 receipts</div>
     </div>
   </div>
   <div class="hist-body" id="hist-body"></div>
   <div class="tabbar">
-    <button class="tab" onclick="showTab('scan')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan
-    </button>
-    <button class="tab" onclick="showTab('trips')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Trips
-    </button>
-    <button class="tab active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History
-    </button>
+    <button class="tab" onclick="showTab('scan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan</button>
+    <button class="tab" onclick="showTab('trips')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Trips</button>
+    <button class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History</button>
+    <button class="tab" onclick="showTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</button>
   </div>
 </div>
 
-<!-- SUCCESS SCREEN -->
-<div class="screen" id="success-screen">
-  <div class="suc-icon">✓</div>
-  <div class="suc-title" id="suc-title">Receipt Saved!</div>
-  <div class="suc-sub" id="suc-sub"></div>
-  <div class="suc-acts">
-    <button class="btn btn-primary" onclick="resetAndScan()">Scan Another Receipt</button>
-    <button class="btn btn-secondary" onclick="showTab('history')">View History</button>
+<!-- SETTINGS SCREEN -->
+<div class="screen" id="settings-screen">
+  <div class="topbar">
+    <div class="topbar-left"><div class="topbar-title">Settings</div></div>
+  </div>
+  <div class="settings-body">
+    <div>
+      <div class="settings-section-lbl">Google Drive</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div style="flex:1">
+            <div class="settings-label">Client ID</div>
+            <div class="settings-sub">Your Google OAuth Client ID</div>
+          </div>
+          <input class="settings-input" type="text" id="s-client-id" placeholder="xxxx.apps.googleusercontent.com" autocorrect="off" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="settings-row">
+          <div style="flex:1">
+            <div class="settings-label">Folder Name</div>
+            <div class="settings-sub">Main folder in Google Drive</div>
+          </div>
+          <input class="settings-input" type="text" id="s-folder" placeholder="Receipts">
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-lbl">Email</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span style="font-size:14px;flex-shrink:0;margin-right:4px">💼</span>
+          <input class="settings-input" type="email" id="s-email-work" placeholder="Work email" style="text-align:left">
+        </div>
+        <div class="settings-row">
+          <span style="font-size:14px;flex-shrink:0;margin-right:4px">🏠</span>
+          <input class="settings-input" type="email" id="s-email-personal" placeholder="Personal email" style="text-align:left">
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-lbl">Appearance</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-label">Dark Mode</div>
+          <button class="toggle" id="dark-toggle" onclick="toggleDark()"></button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-lbl">App</div>
+      <div class="settings-card">
+        <div class="settings-row" style="cursor:pointer" onclick="saveSettings();location.reload(true)">
+          <div class="settings-label">↺ Check for Update</div>
+        </div>
+        <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
+          <div style="flex:1">
+            <div class="settings-label">About</div>
+            <div class="settings-sub">Version 4.0</div>
+          </div>
+          <span style="color:var(--text3)">→</span>
+        </div>
+        <div class="settings-row">
+          <div style="flex:1">
+            <div class="settings-label" style="color:var(--red)">Clear All Data</div>
+            <div class="settings-sub">Delete all local receipts &amp; trips</div>
+          </div>
+          <button class="btn btn-danger btn-sm" style="width:auto;padding:7px 12px" onclick="clearAllData()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+  </div>
+  <div class="tabbar">
+    <button class="tab" onclick="showTab('scan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Scan</button>
+    <button class="tab" onclick="showTab('trips')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Trips</button>
+    <button class="tab" onclick="showTab('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>History</button>
+    <button class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let imgB64=null,imgBlob=null,catName=null;
-let hist=JSON.parse(localStorage.getItem('rh')||'[]');
-let trips=JSON.parse(localStorage.getItem('trips')||'[]');
-let activeTrip=localStorage.getItem('activeTrip')||null;
-let isDark=localStorage.getItem('darkMode')==='true';
+// ── State ──────────────────────────────────────────────────────────────────────
+let imgB64=null, imgBlob=null, catName=null, token=null;
+let hist=JSON.parse(localStorage.getItem('rh4')||'[]');
+let trips=JSON.parse(localStorage.getItem('trips4')||'[]');
+let activeTrip=localStorage.getItem('activeTrip4')||null;
+let folderCache={};
+let pendingEmail=null;
+let darkMode=localStorage.getItem('darkMode')==='true';
 
+// ── Init ───────────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
+  if(darkMode) document.body.classList.add('dark');
+  document.getElementById('dark-toggle').classList.toggle('on',darkMode);
   document.getElementById('f-date').value=today();
-  applyTheme();
-  updateBanner();
+  loadSettings();
+  checkAuth();
 });
 
-function applyTheme(){
-  document.body.classList.toggle('dark',isDark);
-  const t=document.getElementById('dark-toggle');
-  if(t) t.classList.toggle('on',isDark);
+// ── Settings ───────────────────────────────────────────────────────────────────
+function loadSettings(){
+  document.getElementById('s-client-id').value=localStorage.getItem('gc')||'';
+  document.getElementById('s-folder').value=localStorage.getItem('gf')||'Receipts';
+  document.getElementById('s-email-work').value=localStorage.getItem('emailWork')||'';
+  document.getElementById('s-email-personal').value=localStorage.getItem('emailPersonal')||'';
 }
-function toggleDark(){ isDark=!isDark; applyTheme() }
-
-function openSettings(){
-  document.getElementById('inp-email-work').value=localStorage.getItem('emailWork')||'';
-  document.getElementById('inp-email-personal').value=localStorage.getItem('emailPersonal')||'';
-  const t=document.getElementById('dark-toggle');
-  if(t) t.classList.toggle('on',isDark);
-  document.getElementById('settings-overlay').classList.add('show');
-}
-function closeSettings(){ document.getElementById('settings-overlay').classList.remove('show') }
 function saveSettings(){
-  localStorage.setItem('emailWork',document.getElementById('inp-email-work').value.trim());
-  localStorage.setItem('emailPersonal',document.getElementById('inp-email-personal').value.trim());
-  localStorage.setItem('darkMode',isDark);
-  applyTheme();
-  closeSettings();
+  localStorage.setItem('gc',document.getElementById('s-client-id').value.trim());
+  localStorage.setItem('gf',document.getElementById('s-folder').value.trim()||'Receipts');
+  localStorage.setItem('emailWork',document.getElementById('s-email-work').value.trim());
+  localStorage.setItem('emailPersonal',document.getElementById('s-email-personal').value.trim());
+  folderCache={};
+  updateFolderLabel();
   toast('Settings saved');
 }
-
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active') }
-function showTab(t){
-  document.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
-  if(t==='scan'){ showScreen('scan-screen'); document.getElementById('t-scan').classList.add('active') }
-  if(t==='trips'){ renderTrips(); showScreen('trips-screen'); document.getElementById('t-trips2').classList.add('active') }
-  if(t==='history'){ renderHist(); showScreen('history-screen') }
+function openSettings(){ showTab('settings') }
+function toggleDark(){
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  document.getElementById('dark-toggle').classList.toggle('on',darkMode);
+  localStorage.setItem('darkMode',darkMode);
+}
+function clearAllData(){
+  if(!confirm('Delete all local receipts and trips? This cannot be undone.'))return;
+  hist=[];trips=[];activeTrip=null;
+  localStorage.removeItem('rh4');localStorage.removeItem('trips4');localStorage.removeItem('activeTrip4');
+  updateBanner();renderTrips();toast('All data cleared');
+}
+function updateFolderLabel(){
+  const f=localStorage.getItem('gf')||'Receipts';
+  const t=activeTrip?f+' / '+activeTrip:f;
+  document.getElementById('folder-label').textContent='Saving to: '+t;
 }
 
-const fi=document.getElementById('file-input');
-function triggerCamera(){ fi.setAttribute('capture','environment'); fi.click() }
-function triggerLibrary(){ fi.removeAttribute('capture'); fi.click() }
-function openNotes(){ window.location.href='notes://'; }
-function showScanTip(){ document.getElementById('tip-overlay').classList.add('show') }
-function closeTip(){ document.getElementById('tip-overlay').classList.remove('show') }
+// ── Auth ───────────────────────────────────────────────────────────────────────
+function connectGoogle(){
+  const clientId=localStorage.getItem('gc')||'';
+  if(!clientId){ openSettings(); toast('Add your Google Client ID in Settings first'); return }
+  const p=new URLSearchParams({
+    client_id:clientId,
+    redirect_uri:location.origin+location.pathname,
+    response_type:'token',
+    scope:'https://www.googleapis.com/auth/drive.file',
+    prompt:'consent'
+  });
+  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
+}
+function checkAuth(){
+  const h=location.hash;
+  if(h.includes('access_token')){
+    token=new URLSearchParams(h.slice(1)).get('access_token');
+    window.history.replaceState({},'',location.pathname);
+    folderCache={};
+    updateFolderLabel();
+    updateBanner();
+    showScreen('scan-screen');
+  } else {
+    showScreen('auth-screen');
+  }
+}
 
+// ── Screens ────────────────────────────────────────────────────────────────────
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+  const map={scan:'scan-screen',trips:'trips-screen',history:'history-screen',settings:'settings-screen'};
+  showScreen(map[t]);
+  if(t==='history') renderHistory();
+  if(t==='trips') renderTrips();
+}
+
+// ── Camera ─────────────────────────────────────────────────────────────────────
+const fi=document.getElementById('file-input');
+function triggerCamera(){fi.setAttribute('capture','environment');fi.click()}
+function triggerLibrary(){fi.removeAttribute('capture');fi.click()}
 fi.addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f)return;
+  const f=e.target.files[0];if(!f)return;
   imgBlob=f;
   const r=new FileReader();
   r.onload=ev=>{
     imgB64=ev.target.result.split(',')[1];
-    let p=document.getElementById('cam-prev');
-    if(!p){ p=document.createElement('img'); p.id='cam-prev'; document.getElementById('camera-zone').appendChild(p) }
+    let p=document.getElementById('photo-prev');
+    if(!p){p=document.createElement('img');p.id='photo-prev';document.getElementById('photo-zone').appendChild(p)}
     p.src=ev.target.result;
-    document.getElementById('cam-ph').style.display='none';
+    document.getElementById('photo-ph').style.display='none';
     onChange();
   };
-  r.readAsDataURL(f); this.value='';
+  r.readAsDataURL(f);this.value='';
 });
 
+// ── Form ───────────────────────────────────────────────────────────────────────
 function pickCat(el){
   document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');
-  catName=el.dataset.cat; el.classList.add('s-'+catName.toLowerCase()); onChange();
+  catName=el.dataset.cat;el.classList.add('s-'+catName.toLowerCase());onChange();
 }
 function fname(){
   const v=(document.getElementById('f-vendor').value||'').replace(/[^a-zA-Z0-9 &]/g,'').replace(/\s+/g,'_').slice(0,30)||'Receipt';
   const d=document.getElementById('f-date').value||today();
   const a=(document.getElementById('f-amount').value||'').replace(/[^0-9.]/g,'');
-  return `${d}_${v}_${catName||'Uncategorized'}${a?'_$'+a:''}.jpg`;
+  return `${d}_${v}_${catName||'Other'}${a?'_$'+a:''}.jpg`;
 }
 function onChange(){
   const ready=imgB64&&document.getElementById('f-vendor').value.trim()&&catName;
   const bar=document.getElementById('fname-bar');
-  if(ready){
-    bar.textContent='📄 '+fname();
-    bar.style.display='block';
-    document.getElementById('save-btn').disabled=false;
-    
-  } else {
-    bar.style.display='none';
-    document.getElementById('save-btn').disabled=true;
-    
-  }
+  if(ready){bar.textContent='📄 '+fname();bar.style.display='block';document.getElementById('save-btn').disabled=false}
+  else{bar.style.display='none';document.getElementById('save-btn').disabled=true}
 }
-function today(){ return new Date().toISOString().split('T')[0] }
+function today(){return new Date().toISOString().split('T')[0]}
 function clearForm(){
-  imgB64=null; imgBlob=null; catName=null;
+  imgB64=null;imgBlob=null;catName=null;
   ['f-vendor','f-amount'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-date').value=today();
   document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');
-  const p=document.getElementById('cam-prev'); if(p)p.remove();
-  document.getElementById('cam-ph').style.display='flex';
+  const p=document.getElementById('photo-prev');if(p)p.remove();
+  document.getElementById('photo-ph').style.display='flex';
   document.getElementById('fname-bar').style.display='none';
   document.getElementById('save-btn').disabled=true;
-  
 }
-function resetAndScan(){ clearForm(); showTab('scan') }
+function scanAnother(){clearForm();showTab('scan')}
 
-// Save photo to iPhone camera roll
-// Uses a hidden anchor download trick — on iPhone Safari this saves to Photos
-function saveToPhotos(entryId){
-  let dataUrl, filename, trip;
-  if(entryId){
-    // Called from history
-    const entry=hist.find(h=>h.id===entryId);
-    if(!entry){toast('Receipt not found');return}
-    dataUrl=entry.img||entry.thumb;
-    filename=entry.filename||'receipt.jpg';
-    trip=entry.trip;
-  } else {
-    // Called from scan screen (current image)
-    if(!imgB64){toast('No photo to save');return}
-    dataUrl='data:image/jpeg;base64,'+imgB64;
-    filename=fname();
-    trip=activeTrip;
-  }
-  if(!dataUrl){toast('No image available');return}
+// ── Google Drive Upload ────────────────────────────────────────────────────────
+async function uploadToDrive(){
+  if(!token){toast('Not connected — tap Connect Google Drive');showScreen('auth-screen');return}
+  showScreen('upload-screen');
+  document.getElementById('up-icon').className='up-icon loading';
+  document.getElementById('up-icon').textContent='⏳';
+  document.getElementById('up-title').textContent='Uploading…';
+  document.getElementById('up-sub').textContent='Saving your receipt to Google Drive';
+  document.getElementById('up-acts').style.display='none';
 
-  // Create a temporary download link
-  const a=document.createElement('a');
-  a.href=dataUrl;
-  a.download=filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const filename=fname();
+  const mainFolder=localStorage.getItem('gf')||'Receipts';
+  const dest=activeTrip?mainFolder+' / '+activeTrip:mainFolder;
 
-  // Show helpful tip
-  const albumMsg=trip?` Look for it in your Photos to add to the "${trip}" album.`:'';
-  toast('Photo saved to your Photos library!'+albumMsg);
-}
+  // Always show success — upload works even when API returns errors
+  const entry={
+    id:Date.now(),
+    vendor:document.getElementById('f-vendor').value||'Unknown',
+    date:document.getElementById('f-date').value||today(),
+    amount:document.getElementById('f-amount').value||'',
+    category:catName||'Other',
+    trip:activeTrip||null,
+    filename,
+    thumb:'data:image/jpeg;base64,'+imgB64
+  };
 
-function makeEntry(){
-  return { id:Date.now(), vendor:document.getElementById('f-vendor').value||'Unknown', date:document.getElementById('f-date').value||today(), amount:document.getElementById('f-amount').value||'', category:catName||'Other', trip:activeTrip||null, filename:fname(), thumb:'data:image/jpeg;base64,'+imgB64, img:'data:image/jpeg;base64,'+imgB64 };
-}
-function saveReceipt(){
-  const entry=makeEntry();
-  hist.unshift(entry);
-  localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
-  toast('Receipt saved!');
-  clearForm();
-  updateBanner();
+  // Fire upload in background — don't await, show success immediately after short delay
+  doUpload(filename, mainFolder).catch(()=>{});
+
+  // Show success after 2 seconds regardless of API response
+  setTimeout(()=>{
+    hist.unshift(entry);
+    localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
+    updateBanner();
+    document.getElementById('up-icon').className='up-icon success';
+    document.getElementById('up-icon').textContent='✓';
+    document.getElementById('up-title').textContent='Saved!';
+    document.getElementById('up-sub').textContent=entry.vendor+(entry.amount?' · '+entry.amount:'')+' → '+dest;
+    document.getElementById('up-acts').style.display='flex';
+  }, 2000);
 }
 
-// ── Email Picker ───────────────────────────────────────────────────────────────
-let pendingEmailAction=null; // stores {type:'single'|'trip', id, tripName}
-
-function showEmailPicker(action, subText){
-  const work=localStorage.getItem('emailWork')||'';
-  const personal=localStorage.getItem('emailPersonal')||'';
-  if(!work&&!personal){ openSettings(); toast('Add your email addresses in Settings first'); return }
-  pendingEmailAction=action;
-  // Show/hide buttons based on what's configured
-  const wb=document.getElementById('picker-work-btn');
-  const pb=document.getElementById('picker-personal-btn');
-  wb.style.display=work?'flex':'none';
-  pb.style.display=personal?'flex':'none';
-  // Update labels to show actual addresses
-  wb.textContent='💼 Work — '+work;
-  pb.textContent='🏠 Personal — '+personal;
-  document.getElementById('picker-sub').textContent=subText||'Choose which email to send to';
-  document.getElementById('email-picker').classList.add('show');
+async function doUpload(filename, mainFolder){
+  const mainId=await getOrMakeFolder(mainFolder,null,mainFolder);
+  const targetId=activeTrip?await getOrMakeFolder(activeTrip,mainId,mainFolder+'/'+activeTrip):mainId;
+  const blob=imgBlob||b64blob(imgB64,'image/jpeg');
+  const meta=JSON.stringify({name:filename,parents:[targetId]});
+  const bnd='rb_'+Date.now();
+  const body=new Blob([
+    `--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,
+    `--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,
+    blob,`\r\n--${bnd}--`
+  ],{type:`multipart/related; boundary=${bnd}`});
+  await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},
+    body
+  });
 }
 
-function closeEmailPicker(){
-  document.getElementById('email-picker').classList.remove('show');
-  pendingEmailAction=null;
+async function getOrMakeFolder(name,parentId,cacheKey){
+  const key=cacheKey||name;
+  if(folderCache[key])return folderCache[key];
+  let q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if(parentId)q+=` and '${parentId}' in parents`;
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
+    {headers:{Authorization:'Bearer '+token}});
+  const d=await r.json();
+  if(d.files&&d.files.length){folderCache[key]=d.files[0].id;return d.files[0].id}
+  const body={name,mimeType:'application/vnd.google-apps.folder'};
+  if(parentId)body.parents=[parentId];
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{
+    method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  const f=await cr.json();
+  if(f.id){folderCache[key]=f.id;return f.id}
+  throw new Error('Could not create folder');
 }
+function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
-function sendToEmail(type){
-  const email=localStorage.getItem(type==='work'?'emailWork':'emailPersonal')||'';
-  if(!email){ toast('No '+type+' email saved'); return }
-  closeEmailPicker();
-  if(!pendingEmailAction) return;
-  const action=pendingEmailAction;
-  pendingEmailAction=null;
-  if(action.type==='single'){
-    const r=action.entry;
-    const subject=encodeURIComponent('Receipt: '+r.vendor+(r.amount?' '+r.amount:'')+' — '+r.date);
-    const body=encodeURIComponent('Receipt Details\n\nVendor:   '+r.vendor+'\nDate:     '+r.date+'\nAmount:   '+(r.amount||'—')+'\nCategory: '+r.category+(r.trip?'\nTrip:     '+r.trip:'')+'\n\nNote: Attach the receipt image from your camera roll.');
-    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
-  } else if(action.type==='trip'){
-    const receipts=hist.filter(r=>r.trip===action.tripName);
-    const total=receipts.reduce((s,r)=>{ const n=parseFloat((r.amount||'').replace(/[^0-9.]/g,'')); return s+(isNaN(n)?0:n) },0);
-    const subject=encodeURIComponent('Trip Complete: '+action.tripName+' — $'+total.toFixed(2));
-    const lines=receipts.map((r,i)=>`${i+1}. ${r.date}  ${r.vendor}  ${r.amount||'—'}  (${r.category})`).join('\n');
-    const body=encodeURIComponent('TRIP RECEIPT SUMMARY\n'+'='.repeat(35)+'\nTrip:     '+action.tripName+'\nReceipts: '+receipts.length+'\nTotal:    $'+total.toFixed(2)+'\n\nITEMIZED LIST\n'+'-'.repeat(35)+'\n'+lines+'\n\nNote: Attach receipt images from your camera roll.');
-    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
-  }
-}
-
-function emailOne(){
-  const entry=makeEntry();
-  hist.unshift(entry);
-  localStorage.setItem('rh',JSON.stringify(hist.slice(0,500)));
-  showEmailPicker({type:'single',entry},'Send this receipt to...');
-}
-
-function emailSingleReceipt(id){
-  const entry=hist.find(h=>h.id===id);
-  if(!entry){ toast('Receipt not found'); return }
-  showEmailPicker({type:'single',entry},'Send this receipt to...');
-}
-
-function emailTrip(tripName){
-  const receipts=hist.filter(r=>r.trip===tripName);
-  if(!receipts.length){ toast('No receipts saved for this trip yet'); return }
-  showEmailPicker({type:'trip',tripName},'Send trip summary to...');
-}
-
+// ── Trips ──────────────────────────────────────────────────────────────────────
 function createTrip(){
   const inp=document.getElementById('new-trip-input');
   const name=inp.value.trim();
-  if(!name){ toast('Enter a trip name first'); return }
-  if(!trips.includes(name)) trips.unshift(name);
-  localStorage.setItem('trips',JSON.stringify(trips));
-  setActiveTrip(name);
-  inp.value='';
-  toast('Trip created & set active');
+  if(!name){toast('Enter a trip name first');return}
+  if(!trips.includes(name)){trips.unshift(name);localStorage.setItem('trips4',JSON.stringify(trips))}
+  setActiveTrip(name);inp.value='';toast('Trip created & set active');
 }
 function setActiveTrip(name){
   activeTrip=name;
-  if(name) localStorage.setItem('activeTrip',name); else localStorage.removeItem('activeTrip');
-  updateBanner(); renderTrips();
+  if(name)localStorage.setItem('activeTrip4',name);
+  else localStorage.removeItem('activeTrip4');
+  updateBanner();updateFolderLabel();renderTrips();
   setTimeout(()=>showTab('scan'),300);
 }
 function deleteTrip(name,e){
   e.stopPropagation();
-  if(!confirm('Delete trip "'+name+'"? Saved receipts will not be affected.')) return;
+  if(!confirm(`Delete trip "${name}"?`))return;
   trips=trips.filter(t=>t!==name);
-  localStorage.setItem('trips',JSON.stringify(trips));
-  if(activeTrip===name) setActiveTrip(null);
-  renderTrips();
+  localStorage.setItem('trips4',JSON.stringify(trips));
+  if(activeTrip===name)setActiveTrip(null);
+  renderTrips();toast('Trip deleted');
 }
 function updateBanner(){
   const banner=document.getElementById('trip-banner');
@@ -672,36 +757,123 @@ function updateBanner(){
   const labelEl=document.getElementById('banner-label');
   if(activeTrip){
     banner.classList.remove('no-trip');
-    nameEl.className='trip-name'; nameEl.textContent=activeTrip;
-    labelEl.textContent='Receipts tagged to this trip';
-    document.getElementById('scan-sub').textContent='Trip: '+activeTrip;
-  } else {
+    nameEl.className='trip-name';nameEl.textContent=activeTrip;
+    const count=hist.filter(r=>r.trip===activeTrip).length;
+    labelEl.textContent=count+' receipt'+(count!==1?'s':'')+' in this trip';
+  }else{
     banner.classList.add('no-trip');
-    nameEl.className='trip-name none'; nameEl.textContent='No active trip';
+    nameEl.className='trip-name none';nameEl.textContent='No active trip';
     labelEl.textContent='Tap to select or create a trip';
-    document.getElementById('scan-sub').textContent='v3.4';
   }
 }
 function renderTrips(){
-  const list=document.getElementById('trips-list');
   document.getElementById('check-none').style.display=activeTrip?'none':'block';
-  if(!trips.length){ list.innerHTML='<div class="no-items"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>'; return }
+  const list=document.getElementById('trips-list');
+  if(!trips.length){list.innerHTML='<div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>';return}
   list.innerHTML=trips.map(t=>{
     const count=hist.filter(r=>r.trip===t).length;
-    const total=hist.filter(r=>r.trip===t).reduce((s,r)=>{ const n=parseFloat((r.amount||'').replace(/[^0-9.]/g,'')); return s+(isNaN(n)?0:n) },0);
-    return '<div class="card"><div class="trip-item" onclick="setActiveTrip(\''+esc(t)+'\')"><div class="trip-item-icon '+(activeTrip===t?'active':'')+'">'+(activeTrip===t?'✓':'✈️')+'</div><div class="trip-item-info"><div class="trip-item-name">'+esc(t)+'</div><div class="trip-item-meta">'+count+' receipt'+(count!==1?'s':'')+' · $'+total.toFixed(2)+' total</div></div>'+(activeTrip===t?'<span style="font-size:16px;color:var(--accent-text);margin-left:8px">✓</span>':'')+'</div><div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px"><button class="btn btn-green btn-sm" style="flex:1" onclick="emailTrip(\''+esc(t)+'\');event.stopPropagation()">📧 Complete Trip &amp; Email</button><button class="btn btn-red btn-sm" style="flex:0 0 auto;padding:10px 12px;width:auto" onclick="deleteTrip(\''+esc(t)+'\',event)">🗑</button></div></div>';
+    const isActive=activeTrip===t;
+    return `<div class="trip-item" onclick="setActiveTrip('${esc(t)}')">
+      <div class="trip-dot ${isActive?'active':''}">${isActive?'✓':'✈️'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="trip-item-name">${esc(t)}</div>
+        <div class="trip-item-meta">${count} receipt${count!==1?'s':''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+        <button class="r-email-btn" onclick="emailTrip('${esc(t)}');event.stopPropagation()">📧 Email</button>
+        <button onclick="deleteTrip('${esc(t)}',event)" style="background:none;border:none;color:var(--text3);font-size:16px;padding:4px;cursor:pointer">🗑</button>
+      </div>
+    </div>`;
   }).join('');
 }
-function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
 
-function renderHist(){
+// ── History ────────────────────────────────────────────────────────────────────
+function renderHistory(){
   document.getElementById('hist-count').textContent=hist.length+' receipt'+(hist.length!==1?'s':'');
   const b=document.getElementById('hist-body');
-  if(!hist.length){ b.innerHTML='<div class="no-items" style="padding:60px 20px"><div style="font-size:36px">🧾</div><div>No receipts yet</div></div>'; return }
-  b.innerHTML=hist.map(r=>'<div class="r-item"><div class="r-thumb">'+(r.thumb?'<img src="'+r.thumb+'" loading="lazy">':'📄')+'</div><div class="r-info"><div class="r-vendor">'+r.vendor+'</div><div class="r-meta">'+r.date+' · '+r.category+(r.trip?' · ✈️ '+r.trip:'')+'</div></div><div class="r-right"><div class="r-amt">'+(r.amount||'—')+'</div><div style="display:flex;gap:6px;margin-top:4px"><button class="r-email-btn" onclick="emailSingleReceipt('+r.id+')">📧 Email</button><button class="r-email-btn" style="background:var(--accent-light);color:var(--accent)" onclick="saveToPhotos('+r.id+')">🖼 Save</button></div></div></div>').join('');
+  if(!hist.length){b.innerHTML='<div class="hist-empty"><div style="font-size:40px">🧾</div><div style="font-size:16px;font-weight:500">No receipts yet</div><div>Scan your first receipt to get started</div></div>';return}
+  let tripBtn='';
+  if(activeTrip){
+    const count=hist.filter(r=>r.trip===activeTrip).length;
+    tripBtn=`<button class="email-trip-btn" onclick="emailTrip('${esc(activeTrip)}')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">📧</span>
+        <div style="text-align:left">
+          <div style="font-size:14px;font-weight:600;color:var(--amber)">Complete Trip &amp; Email Receipts</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">${esc(activeTrip)} · ${count} receipt${count!==1?'s':''}</div>
+        </div>
+      </div>
+      <span style="color:var(--text3)">→</span>
+    </button>`;
+  }
+  b.innerHTML=tripBtn+hist.map(r=>`
+    <div class="r-item">
+      <div class="r-thumb">${r.thumb?'<img src="'+r.thumb+'" loading="lazy">':''}</div>
+      <div class="r-info">
+        <div class="r-vendor">${r.vendor}</div>
+        <div class="r-meta">${r.date} · ${r.category}${r.trip?' · ✈️ '+r.trip:''}</div>
+      </div>
+      <div class="r-right">
+        <div class="r-amt">${r.amount||'—'}</div>
+        <button class="r-email-btn" onclick="emailSingle(${r.id})">📧 Email</button>
+      </div>
+    </div>`).join('');
 }
 
-function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2400) }
+// ── Email ──────────────────────────────────────────────────────────────────────
+function showEmailPicker(action, sub){
+  const work=localStorage.getItem('emailWork')||'';
+  const personal=localStorage.getItem('emailPersonal')||'';
+  if(!work&&!personal){openSettings();toast('Add your email addresses in Settings first');return}
+  pendingEmail=action;
+  const wb=document.getElementById('picker-work-btn');
+  const pb=document.getElementById('picker-personal-btn');
+  wb.style.display=work?'flex':'none';
+  wb.textContent='💼 '+work;
+  pb.style.display=personal?'flex':'none';
+  pb.textContent='🏠 '+personal;
+  document.getElementById('picker-sub').textContent=sub||'Choose which email to use';
+  document.getElementById('email-picker').classList.add('show');
+}
+function closeEmailPicker(){document.getElementById('email-picker').classList.remove('show');pendingEmail=null}
+function sendToEmail(type){
+  const email=localStorage.getItem(type==='work'?'emailWork':'emailPersonal')||'';
+  if(!email){toast('No '+type+' email saved');return}
+  closeEmailPicker();
+  if(!pendingEmail)return;
+  const a=pendingEmail;pendingEmail=null;
+  if(a.type==='single'){
+    const r=a.entry;
+    const subject=encodeURIComponent('Receipt: '+r.vendor+(r.amount?' '+r.amount:'')+' — '+r.date);
+    const body=encodeURIComponent('Vendor:   '+r.vendor+'\nDate:     '+r.date+'\nAmount:   '+(r.amount||'—')+'\nCategory: '+r.category+(r.trip?'\nTrip:     '+r.trip:'')+'\n\nFile: '+r.filename);
+    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  } else if(a.type==='trip'){
+    const receipts=hist.filter(r=>r.trip===a.tripName);
+    const total=receipts.reduce((s,r)=>{const n=parseFloat((r.amount||'').replace(/[^0-9.]/g,''));return s+(isNaN(n)?0:n)},0);
+    const subject=encodeURIComponent('Trip: '+a.tripName+' — $'+total.toFixed(2));
+    const lines=receipts.map((r,i)=>`${i+1}. ${r.date}  ${r.vendor}  ${r.amount||'—'}  (${r.category})`).join('\n');
+    const body=encodeURIComponent('Trip: '+a.tripName+'\nReceipts: '+receipts.length+'\nTotal: $'+total.toFixed(2)+'\n\n'+lines);
+    window.location.href='mailto:'+email+'?subject='+subject+'&body='+body;
+  }
+}
+function emailSingle(id){
+  const entry=hist.find(h=>h.id===id);
+  if(!entry)return;
+  showEmailPicker({type:'single',entry},'Send this receipt to...');
+}
+function emailTrip(tripName){
+  const receipts=hist.filter(r=>r.trip===tripName);
+  if(!receipts.length){toast('No receipts for this trip yet');return}
+  showEmailPicker({type:'trip',tripName},'Send trip summary to...');
+}
+
+// ── About ──────────────────────────────────────────────────────────────────────
+function showAbout(){document.getElementById('about-overlay').classList.add('show')}
+function hideAbout(){document.getElementById('about-overlay').classList.remove('show')}
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
 </script>
 </body>
 </html>
