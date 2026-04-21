@@ -233,12 +233,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.2</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.3</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.3</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed 2nd+ uploads hanging forever<br>• Root cause: stale folder cache causing silent fetch hang<br>• Now clears folder cache before every upload<br>• Added AbortController timeout on Drive fetch so it can never hang</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.2</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Fixed upload hanging forever — added 10s timeout<br>• If upload stalls (e.g. expired token), success screen shows automatically<br>• Receipt still saves to history locally regardless</div>
@@ -267,7 +271,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.2</div>
+  <div class="auth-version">Version 4.3</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -490,7 +494,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.2</div>
+            <div class="settings-sub">Version 4.3</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -700,6 +704,7 @@ async function uploadToDrive(){
 }
 
 async function doUpload(filename, mainFolder){
+  folderCache={};
   const mainId=await getOrMakeFolder(mainFolder,null,mainFolder);
   const targetId=activeTrip?await getOrMakeFolder(activeTrip,mainId,mainFolder+'/'+activeTrip):mainId;
   const blob=imgBlob||b64blob(imgB64,'image/jpeg');
@@ -710,11 +715,15 @@ async function doUpload(filename, mainFolder){
     `--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,
     blob,`\r\n--${bnd}--`
   ],{type:`multipart/related; boundary=${bnd}`});
-  await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-    method:'POST',
-    headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},
-    body
-  });
+  const ac=new AbortController();
+  const t=setTimeout(()=>ac.abort(),9000);
+  try{
+    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},
+      body,signal:ac.signal
+    });
+  }finally{ clearTimeout(t); }
 }
 
 async function getOrMakeFolder(name,parentId,cacheKey){
