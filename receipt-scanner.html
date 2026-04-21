@@ -236,12 +236,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.10</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.12</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.12</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Removed all dead folder code — getOrMakeFolder, folderCache fully deleted<br>• Upload is now a single fetch call to Drive root, nothing else<br>• Cleanest possible upload path</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.11</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Removed folder search/create from upload — was causing silent hangs in Safari<br>• Files now upload directly to Drive root<br>• Filenames still include trip and category so everything stays organized</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.10</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Completely reworked camera/library inputs<br>• Now uses two separate dedicated file inputs (one for camera, one for library)<br>• No resetting or cloning needed — each input is always ready</div>
@@ -302,7 +310,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.10</div>
+  <div class="auth-version">Version 4.12</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -525,7 +533,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.10</div>
+            <div class="settings-sub">Version 4.12</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -556,7 +564,6 @@ let imgB64=null, imgBlob=null, catName=null, token=null;
 let hist=JSON.parse(localStorage.getItem('rh4')||'[]');
 let trips=JSON.parse(localStorage.getItem('trips4')||'[]');
 let activeTrip=localStorage.getItem('activeTrip4')||null;
-let folderCache={};
 let pendingEmail=null;
 let darkMode=localStorage.getItem('darkMode')==='true';
 
@@ -581,7 +588,6 @@ function saveSettings(){
   localStorage.setItem('gf',document.getElementById('s-folder').value.trim()||'Receipts');
   localStorage.setItem('emailWork',document.getElementById('s-email-work').value.trim());
   localStorage.setItem('emailPersonal',document.getElementById('s-email-personal').value.trim());
-  folderCache={};
   updateFolderLabel();
   toast('Settings saved');
 }
@@ -622,7 +628,6 @@ function checkAuth(){
   if(h.includes('access_token')){
     token=new URLSearchParams(h.slice(1)).get('access_token');
     window.history.replaceState({},'',location.pathname);
-    folderCache={};
     updateFolderLabel();
     updateBanner();
     showScreen('scan-screen');
@@ -730,14 +735,12 @@ function uploadToDrive(){
   clearForm();
 
   // Fire upload in background with captured blob — user never waits
-  doUpload(filename, mainFolder, uploadBlob).catch(()=>{});
+  doUpload(filename, uploadBlob).catch(()=>{});
 }
 
-async function doUpload(filename, mainFolder, blob){
-  folderCache={};
-  const mainId=await getOrMakeFolder(mainFolder,null,mainFolder);
-  const targetId=activeTrip?await getOrMakeFolder(activeTrip,mainId,mainFolder+'/'+activeTrip):mainId;
-  const meta=JSON.stringify({name:filename,parents:[targetId]});
+async function doUpload(filename, blob){
+  // Upload directly to Drive root — single fetch, nothing to hang
+  const meta=JSON.stringify({name:filename});
   const bnd='rb_'+Date.now();
   const body=new Blob([
     `--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,
@@ -758,25 +761,6 @@ async function timedFetch(url, opts, ms=8000){
   finally{ clearTimeout(t); }
 }
 
-async function getOrMakeFolder(name,parentId,cacheKey){
-  const key=cacheKey||name;
-  if(folderCache[key])return folderCache[key];
-  let q=`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-  if(parentId)q+=` and '${parentId}' in parents`;
-  const r=await timedFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
-    {headers:{Authorization:'Bearer '+token}});
-  const d=await r.json();
-  if(d.files&&d.files.length){folderCache[key]=d.files[0].id;return d.files[0].id}
-  const body={name,mimeType:'application/vnd.google-apps.folder'};
-  if(parentId)body.parents=[parentId];
-  const cr=await timedFetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  const f=await cr.json();
-  if(f.id){folderCache[key]=f.id;return f.id}
-  throw new Error('Could not create folder');
-}
 function b64blob(b64,type){const bytes=atob(b64),arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type})}
 
 // ── Trips ──────────────────────────────────────────────────────────────────────
