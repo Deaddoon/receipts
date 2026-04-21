@@ -199,7 +199,7 @@
         <span style="font-size:24px">🧾</span>
         <div>
           <div style="font-size:15px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 3.8</div>
+          <div style="font-size:11px;color:var(--text3)">Version 3.10</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Version History</div>
@@ -331,10 +331,7 @@
     <div style="height:8px;flex-shrink:0"></div>
   </div>
   <div class="scan-footer">
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled style="flex:1">Save Receipt</button>
-      <button class="btn btn-secondary" id="save-photo-btn" onclick="saveToPhotos(null)" disabled style="flex:1">🖼 Save to Photos</button>
-    </div>
+    <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled>Save Receipt</button>
     <button class="btn btn-ghost btn-sm" onclick="clearForm()">Clear</button>
   </div>
   <div class="tabbar">
@@ -477,7 +474,7 @@ function showTab(t){
 const fi=document.getElementById('file-input');
 function triggerCamera(){ fi.setAttribute('capture','environment'); fi.click() }
 function triggerLibrary(){ fi.removeAttribute('capture'); fi.click() }
-function openNotes(){ window.location.href='apple-notes://'; }
+function openNotes(){ window.location.href='notes://'; }
 function showScanTip(){ document.getElementById('tip-overlay').classList.add('show') }
 function closeTip(){ document.getElementById('tip-overlay').classList.remove('show') }
 
@@ -513,11 +510,11 @@ function onChange(){
     bar.textContent='📄 '+fname();
     bar.style.display='block';
     document.getElementById('save-btn').disabled=false;
-    document.getElementById('save-photo-btn').disabled=false;
+    
   } else {
     bar.style.display='none';
     document.getElementById('save-btn').disabled=true;
-    document.getElementById('save-photo-btn').disabled=true;
+    
   }
 }
 function today(){ return new Date().toISOString().split('T')[0] }
@@ -530,7 +527,7 @@ function clearForm(){
   document.getElementById('cam-ph').style.display='flex';
   document.getElementById('fname-bar').style.display='none';
   document.getElementById('save-btn').disabled=true;
-  document.getElementById('save-photo-btn').disabled=true;
+  
 }
 function resetAndScan(){ clearForm(); showTab('scan') }
 
@@ -574,7 +571,7 @@ function saveReceipt(){
   const entry=makeEntry();
   hist.unshift(entry);
   localStorage.setItem('rh',JSON.stringify(hist.slice(0,200)));
-  toast('Receipt saved! Tap 🖼 Save to Photos to add to your camera roll.');
+  toast('Receipt saved!');
   clearForm();
   updateBanner();
 }
