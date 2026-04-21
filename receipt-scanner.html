@@ -236,12 +236,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.12</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.13</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.13</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Scan saves locally only — zero network calls during scanning<br>• New "Upload to Drive" button in History tab uploads all pending receipts at once<br>• Receipts marked as uploaded so they're never sent twice<br>• Counter shows how many are pending upload</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.12</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Removed all dead folder code — getOrMakeFolder, folderCache fully deleted<br>• Upload is now a single fetch call to Drive root, nothing else<br>• Cleanest possible upload path</div>
@@ -310,7 +314,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.12</div>
+  <div class="auth-version">Version 4.13</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -395,7 +399,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
 
   <div class="scan-footer">
-    <button class="btn btn-primary" id="save-btn" onclick="uploadToDrive()" disabled>Save to Google Drive →</button>
+    <button class="btn btn-primary" id="save-btn" onclick="saveReceipt()" disabled>Save Receipt</button>
     <button class="btn btn-ghost btn-sm" onclick="clearForm()">Clear</button>
   </div>
 
@@ -467,6 +471,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="topbar-title">History</div>
       <div class="topbar-sub" id="hist-count">0 receipts</div>
     </div>
+    <button class="btn btn-primary btn-sm" id="upload-all-btn" onclick="uploadAll()" style="display:none">☁️ Upload to Drive</button>
   </div>
   <div class="hist-body" id="hist-body"></div>
   <div class="tabbar">
@@ -533,7 +538,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.12</div>
+            <div class="settings-sub">Version 4.13</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -642,7 +647,7 @@ function showTab(t){
   document.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
   const map={scan:'scan-screen',trips:'trips-screen',history:'history-screen',settings:'settings-screen'};
   showScreen(map[t]);
-  if(t==='history') renderHistory();
+  if(t==='history'){renderHistory();updateUploadBtn();}
   if(t==='trips') renderTrips();
 }
 
@@ -698,14 +703,9 @@ function clearForm(){
 }
 function scanAnother(){clearForm();showTab('scan')}
 
-// ── Google Drive Upload ────────────────────────────────────────────────────────
-function uploadToDrive(){
-  if(!token){toast('Not connected — tap Connect Google Drive');showScreen('auth-screen');return}
-
+// ── Save locally (no Drive upload) ────────────────────────────────────────────
+function saveReceipt(){
   const filename=fname();
-  const mainFolder=localStorage.getItem('gf')||'Receipts';
-  const dest=activeTrip?mainFolder+' / '+activeTrip:mainFolder;
-
   const entry={
     id:Date.now(),
     vendor:document.getElementById('f-vendor').value||'Unknown',
@@ -714,28 +714,65 @@ function uploadToDrive(){
     category:catName||'Other',
     trip:activeTrip||null,
     filename,
-    thumb:'data:image/jpeg;base64,'+imgB64
+    thumb:'data:image/jpeg;base64,'+imgB64,
+    blob:imgB64,  // store for later upload
+    uploaded:false
   };
 
-  // Capture image data NOW before clearForm() wipes it
-  const uploadBlob = imgBlob || b64blob(imgB64,'image/jpeg');
-
-  // Haptic-style visual pulse on the form
-  const sb=document.getElementById('scan-screen');
-  sb.classList.remove('save-flash');
-  void sb.offsetWidth; // force reflow so animation retriggers
-  sb.classList.add('save-flash');
-  setTimeout(()=>sb.classList.remove('save-flash'),500);
-
-  // Save to history and clear form immediately — don't wait for upload
   hist.unshift(entry);
   localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
   updateBanner();
+  updateUploadBtn();
+
+  // Haptic-style visual pulse
+  const sb=document.getElementById('scan-screen');
+  sb.classList.remove('save-flash');
+  void sb.offsetWidth;
+  sb.classList.add('save-flash');
+  setTimeout(()=>sb.classList.remove('save-flash'),500);
+
   toast('✓ Saved — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
   clearForm();
+}
 
-  // Fire upload in background with captured blob — user never waits
-  doUpload(filename, uploadBlob).catch(()=>{});
+// ── Upload All to Drive ────────────────────────────────────────────────────────
+function updateUploadBtn(){
+  const pending=hist.filter(r=>!r.uploaded).length;
+  const btn=document.getElementById('upload-all-btn');
+  if(!btn)return;
+  if(pending>0){
+    btn.style.display='block';
+    btn.textContent='☁️ Upload '+pending+' to Drive';
+    btn.disabled=false;
+  } else {
+    btn.style.display='none';
+  }
+}
+
+async function uploadAll(){
+  if(!token){toast('Not connected — tap Connect Google Drive');showScreen('auth-screen');return}
+  const pending=hist.filter(r=>!r.uploaded);
+  if(!pending.length){toast('Nothing to upload');return}
+  const btn=document.getElementById('upload-all-btn');
+  btn.disabled=true;
+  btn.textContent='☁️ Uploading…';
+  let done=0;
+  for(const entry of pending){
+    try{
+      const blob=b64blob(entry.blob,'image/jpeg');
+      await doUpload(entry.filename, blob);
+      entry.uploaded=true;
+      done++;
+      btn.textContent='☁️ Uploaded '+done+'/'+pending.length+'…';
+      localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
+    }catch(e){
+      toast('Upload stopped — '+done+' of '+pending.length+' sent');
+      updateUploadBtn();
+      return;
+    }
+  }
+  toast('✓ All '+done+' receipts uploaded to Drive!');
+  updateUploadBtn();
 }
 
 async function doUpload(filename, blob){
