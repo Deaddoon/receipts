@@ -235,12 +235,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.7</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.8</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.8</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed second scan doing nothing after first save<br>• Root cause: iPhone Safari file input gets stuck after first use<br>• Now recreates file input element fresh after every photo selection</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.7</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Added haptic-style green pulse on Save — whole screen flashes to confirm tap registered</div>
@@ -289,7 +293,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.7</div>
+  <div class="auth-version">Version 4.8</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -512,7 +516,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.7</div>
+            <div class="settings-sub">Version 4.8</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -629,23 +633,32 @@ function showTab(t){
 }
 
 // ── Camera ─────────────────────────────────────────────────────────────────────
-const fi=document.getElementById('file-input');
-function triggerCamera(){fi.setAttribute('capture','environment');fi.click()}
-function triggerLibrary(){fi.removeAttribute('capture');fi.click()}
-fi.addEventListener('change',function(e){
-  const f=e.target.files[0];if(!f)return;
-  imgBlob=f;
-  const r=new FileReader();
-  r.onload=ev=>{
-    imgB64=ev.target.result.split(',')[1];
-    let p=document.getElementById('photo-prev');
-    if(!p){p=document.createElement('img');p.id='photo-prev';document.getElementById('photo-zone').appendChild(p)}
-    p.src=ev.target.result;
-    document.getElementById('photo-ph').style.display='none';
-    onChange();
-  };
-  r.readAsDataURL(f);this.value='';
-});
+function makeFileInput(){
+  const old=document.getElementById('file-input');
+  const fi=document.createElement('input');
+  fi.type='file';fi.accept='image/*';fi.id='file-input';fi.style.display='none';
+  fi.addEventListener('change',function(e){
+    const f=e.target.files[0];if(!f)return;
+    imgBlob=f;
+    const r=new FileReader();
+    r.onload=ev=>{
+      imgB64=ev.target.result.split(',')[1];
+      let p=document.getElementById('photo-prev');
+      if(!p){p=document.createElement('img');p.id='photo-prev';document.getElementById('photo-zone').appendChild(p)}
+      p.src=ev.target.result;
+      document.getElementById('photo-ph').style.display='none';
+      onChange();
+    };
+    r.readAsDataURL(f);
+    // Replace input so it's always fresh for next use
+    setTimeout(makeFileInput, 100);
+  });
+  if(old) old.replaceWith(fi); else document.body.appendChild(fi);
+  return fi;
+}
+makeFileInput();
+function triggerCamera(){const fi=document.getElementById('file-input');fi.setAttribute('capture','environment');fi.click()}
+function triggerLibrary(){const fi=document.getElementById('file-input');fi.removeAttribute('capture');fi.click()}
 
 // ── Form ───────────────────────────────────────────────────────────────────────
 function pickCat(el){
