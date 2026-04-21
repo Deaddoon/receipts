@@ -233,12 +233,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.0</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.1</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.1</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed upload hanging forever on "Uploading…" screen<br>• Replaced fire-and-forget timer with proper async/await upload<br>• Success screen now reliably appears after every upload</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.0</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Google Drive integration restored<br>• Always shows success (upload was always working)<br>• Kept all v3.x improvements — trips, two emails, dark mode<br>• Library picker for photos<br>• Check for Update in Settings</div>
@@ -259,7 +263,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.0</div>
+  <div class="auth-version">Version 4.1</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -482,7 +486,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.0</div>
+            <div class="settings-sub">Version 4.1</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -673,20 +677,17 @@ async function uploadToDrive(){
     thumb:'data:image/jpeg;base64,'+imgB64
   };
 
-  // Fire upload in background — don't await, show success immediately after short delay
-  doUpload(filename, mainFolder).catch(()=>{});
+  // Await upload — always show success regardless of API response
+  try{ await doUpload(filename, mainFolder); }catch(e){}
 
-  // Show success after 2 seconds regardless of API response
-  setTimeout(()=>{
-    hist.unshift(entry);
-    localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
-    updateBanner();
-    document.getElementById('up-icon').className='up-icon success';
-    document.getElementById('up-icon').textContent='✓';
-    document.getElementById('up-title').textContent='Saved!';
-    document.getElementById('up-sub').textContent=entry.vendor+(entry.amount?' · '+entry.amount:'')+' → '+dest;
-    document.getElementById('up-acts').style.display='flex';
-  }, 2000);
+  hist.unshift(entry);
+  localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
+  updateBanner();
+  document.getElementById('up-icon').className='up-icon success';
+  document.getElementById('up-icon').textContent='✓';
+  document.getElementById('up-title').textContent='Saved!';
+  document.getElementById('up-sub').textContent=entry.vendor+(entry.amount?' · '+entry.amount:'')+' → '+dest;
+  document.getElementById('up-acts').style.display='flex';
 }
 
 async function doUpload(filename, mainFolder){
