@@ -208,11 +208,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* TOAST */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200;font-family:var(--font)}
 .toast.show{opacity:1}
-#file-input{display:none}
+#fi-camera,#fi-library{display:none}
 </style>
 </head>
 <body>
-<input type="file" id="file-input" accept="image/*">
+<input type="file" id="fi-camera" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="fi-library" accept="image/*" style="display:none">
 
 <!-- EMAIL PICKER -->
 <div class="overlay" id="email-picker" onclick="closeEmailPicker()">
@@ -235,12 +236,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.8</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.10</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.10</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Completely reworked camera/library inputs<br>• Now uses two separate dedicated file inputs (one for camera, one for library)<br>• No resetting or cloning needed — each input is always ready</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.9</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed camera/library button unclickable after first use<br>• Switched to clone-and-replace reset for file input — more reliable on Safari than recreation</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.8</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Fixed second scan doing nothing after first save<br>• Root cause: iPhone Safari file input gets stuck after first use<br>• Now recreates file input element fresh after every photo selection</div>
@@ -293,7 +302,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.8</div>
+  <div class="auth-version">Version 4.10</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -516,7 +525,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.8</div>
+            <div class="settings-sub">Version 4.10</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -633,32 +642,26 @@ function showTab(t){
 }
 
 // ── Camera ─────────────────────────────────────────────────────────────────────
-function makeFileInput(){
-  const old=document.getElementById('file-input');
-  const fi=document.createElement('input');
-  fi.type='file';fi.accept='image/*';fi.id='file-input';fi.style.display='none';
-  fi.addEventListener('change',function(e){
-    const f=e.target.files[0];if(!f)return;
-    imgBlob=f;
-    const r=new FileReader();
-    r.onload=ev=>{
-      imgB64=ev.target.result.split(',')[1];
-      let p=document.getElementById('photo-prev');
-      if(!p){p=document.createElement('img');p.id='photo-prev';document.getElementById('photo-zone').appendChild(p)}
-      p.src=ev.target.result;
-      document.getElementById('photo-ph').style.display='none';
-      onChange();
-    };
-    r.readAsDataURL(f);
-    // Replace input so it's always fresh for next use
-    setTimeout(makeFileInput, 100);
-  });
-  if(old) old.replaceWith(fi); else document.body.appendChild(fi);
-  return fi;
+function onFileChosen(e){
+  const f=e.target.files[0];if(!f)return;
+  // Reset both inputs immediately so they're ready for next tap
+  e.target.value='';
+  imgBlob=f;
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgB64=ev.target.result.split(',')[1];
+    let p=document.getElementById('photo-prev');
+    if(!p){p=document.createElement('img');p.id='photo-prev';document.getElementById('photo-zone').appendChild(p)}
+    p.src=ev.target.result;
+    document.getElementById('photo-ph').style.display='none';
+    onChange();
+  };
+  r.readAsDataURL(f);
 }
-makeFileInput();
-function triggerCamera(){const fi=document.getElementById('file-input');fi.setAttribute('capture','environment');fi.click()}
-function triggerLibrary(){const fi=document.getElementById('file-input');fi.removeAttribute('capture');fi.click()}
+document.getElementById('fi-camera').addEventListener('change',onFileChosen);
+document.getElementById('fi-library').addEventListener('change',onFileChosen);
+function triggerCamera(){document.getElementById('fi-camera').click()}
+function triggerLibrary(){document.getElementById('fi-library').click()}
 
 // ── Form ───────────────────────────────────────────────────────────────────────
 function pickCat(el){
