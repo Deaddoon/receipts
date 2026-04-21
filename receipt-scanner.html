@@ -236,12 +236,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.13</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.14</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.14</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Added detailed error messages to diagnose upload failures<br>• Toast now shows exact HTTP error code when upload stops</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.13</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Scan saves locally only — zero network calls during scanning<br>• New "Upload to Drive" button in History tab uploads all pending receipts at once<br>• Receipts marked as uploaded so they're never sent twice<br>• Counter shows how many are pending upload</div>
@@ -314,7 +318,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.13</div>
+  <div class="auth-version">Version 4.14</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -538,7 +542,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.13</div>
+            <div class="settings-sub">Version 4.14</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -766,7 +770,7 @@ async function uploadAll(){
       btn.textContent='☁️ Uploaded '+done+'/'+pending.length+'…';
       localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
     }catch(e){
-      toast('Upload stopped — '+done+' of '+pending.length+' sent');
+      toast('Stopped after '+done+': '+(e.message||'unknown error'));
       updateUploadBtn();
       return;
     }
@@ -776,7 +780,6 @@ async function uploadAll(){
 }
 
 async function doUpload(filename, blob){
-  // Upload directly to Drive root — single fetch, nothing to hang
   const meta=JSON.stringify({name:filename});
   const bnd='rb_'+Date.now();
   const body=new Blob([
@@ -784,11 +787,15 @@ async function doUpload(filename, blob){
     `--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,
     blob,`\r\n--${bnd}--`
   ],{type:`multipart/related; boundary=${bnd}`});
-  await timedFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+  const res=await timedFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
     method:'POST',
     headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},
     body
   });
+  if(!res.ok){
+    const txt=await res.text().catch(()=>'');
+    throw new Error('HTTP '+res.status+' '+txt.slice(0,80));
+  }
 }
 
 async function timedFetch(url, opts, ms=8000){
