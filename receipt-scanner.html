@@ -198,11 +198,19 @@
         <span style="font-size:24px">🧾</span>
         <div>
           <div style="font-size:15px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 3.5</div>
+          <div style="font-size:11px;color:var(--text3)">Version 3.7</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Version History</div>
       <div class="v-card">
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.7</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">&bull; Removed Camera button — Notes + Library only<br>&bull; Main zone now opens Library</div>
+        </div>
+        <div class="v-row">
+          <div class="v-header"><span class="v-num">v3.6</span><span class="v-date">April 2026</span></div>
+          <div class="v-notes">&bull; Added Notes button — opens iPhone Notes app directly<br>&bull; Camera button added to photo row</div>
+        </div>
         <div class="v-row">
           <div class="v-header"><span class="v-num">v3.5</span><span class="v-date">April 2026</span></div>
           <div class="v-notes">&bull; Compacted settings overlay</div>
@@ -277,17 +285,17 @@
     <span style="font-size:12px;color:var(--text3);flex-shrink:0">Change →</span>
   </div>
   <div class="scan-body">
-    <div class="camera-zone" id="camera-zone" onclick="triggerCamera()">
+    <div class="camera-zone" id="camera-zone" onclick="triggerLibrary()">
       <div class="corner c-tl"></div>
       <div class="corner c-br"></div>
       <div class="cam-ph" id="cam-ph">
-        <div class="cam-icon">📷</div>
-        <div class="cam-label">Tap to open camera</div>
-        <div class="cam-sub">Take a photo of your receipt</div>
+        <div class="cam-icon">🖼</div>
+        <div class="cam-label">Tap to pick from Library</div>
+        <div class="cam-sub">Or use the buttons below</div>
       </div>
     </div>
     <div class="photo-btns">
-      <button class="btn btn-secondary btn-sm" onclick="showScanTip()">📄 Scan Doc</button>
+      <button class="btn btn-secondary btn-sm" onclick="openNotes()">📝 Open Notes to Scan</button>
       <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Library</button>
     </div>
     <div class="entry-form">
@@ -464,6 +472,7 @@ function showTab(t){
 const fi=document.getElementById('file-input');
 function triggerCamera(){ fi.setAttribute('capture','environment'); fi.click() }
 function triggerLibrary(){ fi.removeAttribute('capture'); fi.click() }
+function openNotes(){ window.location.href='apple-notes://'; }
 function showScanTip(){ document.getElementById('tip-overlay').classList.add('show') }
 function closeTip(){ document.getElementById('tip-overlay').classList.remove('show') }
 
