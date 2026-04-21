@@ -236,12 +236,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.14</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.15</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.15</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Switched from Google Drive to Dropbox for uploads<br>• Google's implicit OAuth flow was blocking uploads after 1 file for unverified apps<br>• Dropbox uses a simple access token — paste once in Settings, works forever<br>• Files go to /ReceiptScan folder in your Dropbox</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.14</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Added detailed error messages to diagnose upload failures<br>• Toast now shows exact HTTP error code when upload stops</div>
@@ -318,17 +322,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.14</div>
-  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
+  <div class="auth-version">Version 4.15</div>
+  <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
     <div class="perm-row"><span style="font-size:18px">✈️</span> Organize by business trip</div>
-    <div class="perm-row"><span style="font-size:18px">📁</span> Saves images to Google Drive</div>
+    <div class="perm-row"><span style="font-size:18px">📦</span> Saves images to Dropbox</div>
     <div class="perm-row"><span style="font-size:18px">📧</span> Email receipts &amp; trip summaries</div>
-    <div class="perm-row"><span style="font-size:18px">🔒</span> Only your Google account accessed</div>
+    <div class="perm-row"><span style="font-size:18px">🔒</span> Token stored only on your device</div>
   </div>
   <div class="auth-acts">
-    <button class="btn btn-primary" onclick="connectGoogle()">Connect Google Drive</button>
+    <button class="btn btn-primary" onclick="checkDropbox()">Get Started</button>
     <button class="btn btn-ghost" onclick="openSettings()">⚙️ Settings</button>
   </div>
 </div>
@@ -493,14 +497,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
   <div class="settings-body">
     <div>
-      <div class="settings-section-lbl">Google Drive</div>
+      <div class="settings-section-lbl">Dropbox</div>
       <div class="settings-card">
         <div class="settings-row">
           <div style="flex:1">
-            <div class="settings-label">Client ID</div>
-            <div class="settings-sub">Your Google OAuth Client ID</div>
+            <div class="settings-label">Access Token</div>
+            <div class="settings-sub">Your Dropbox access token</div>
           </div>
-          <input class="settings-input" type="text" id="s-client-id" placeholder="xxxx.apps.googleusercontent.com" autocorrect="off" autocomplete="off" spellcheck="false">
+          <input class="settings-input" type="password" id="s-dropbox-token" placeholder="Paste Dropbox access token here" autocorrect="off" autocomplete="off" spellcheck="false">
         </div>
         <div class="settings-row">
           <div style="flex:1">
@@ -542,7 +546,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.14</div>
+            <div class="settings-sub">Version 4.15</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -587,13 +591,13 @@ window.addEventListener('load',()=>{
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 function loadSettings(){
-  document.getElementById('s-client-id').value=localStorage.getItem('gc')||'';
+  document.getElementById('s-dropbox-token').value=localStorage.getItem('dbToken')||'';
   document.getElementById('s-folder').value=localStorage.getItem('gf')||'Receipts';
   document.getElementById('s-email-work').value=localStorage.getItem('emailWork')||'';
   document.getElementById('s-email-personal').value=localStorage.getItem('emailPersonal')||'';
 }
 function saveSettings(){
-  localStorage.setItem('gc',document.getElementById('s-client-id').value.trim());
+  localStorage.setItem('dbToken',document.getElementById('s-dropbox-token').value.trim());
   localStorage.setItem('gf',document.getElementById('s-folder').value.trim()||'Receipts');
   localStorage.setItem('emailWork',document.getElementById('s-email-work').value.trim());
   localStorage.setItem('emailPersonal',document.getElementById('s-email-personal').value.trim());
@@ -620,29 +624,18 @@ function updateFolderLabel(){
 }
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
-function connectGoogle(){
-  const clientId=localStorage.getItem('gc')||'';
-  if(!clientId){ openSettings(); toast('Add your Google Client ID in Settings first'); return }
-  const p=new URLSearchParams({
-    client_id:clientId,
-    redirect_uri:location.origin+location.pathname,
-    response_type:'token',
-    scope:'https://www.googleapis.com/auth/drive.file',
-    prompt:'consent'
-  });
-  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
+function checkDropbox(){
+  const t=localStorage.getItem('dbToken')||'';
+  if(!t){ openSettings(); toast('Add your Dropbox access token in Settings first'); return }
+  token=t;
+  updateFolderLabel();
+  updateBanner();
+  showScreen('scan-screen');
 }
 function checkAuth(){
-  const h=location.hash;
-  if(h.includes('access_token')){
-    token=new URLSearchParams(h.slice(1)).get('access_token');
-    window.history.replaceState({},'',location.pathname);
-    updateFolderLabel();
-    updateBanner();
-    showScreen('scan-screen');
-  } else {
-    showScreen('auth-screen');
-  }
+  const t=localStorage.getItem('dbToken')||'';
+  if(t){ token=t; updateFolderLabel(); updateBanner(); showScreen('scan-screen'); }
+  else { showScreen('auth-screen'); }
 }
 
 // ── Screens ────────────────────────────────────────────────────────────────────
@@ -754,7 +747,7 @@ function updateUploadBtn(){
 }
 
 async function uploadAll(){
-  if(!token){toast('Not connected — tap Connect Google Drive');showScreen('auth-screen');return}
+  if(!token){toast('No Dropbox token — add it in Settings');openSettings();return}
   const pending=hist.filter(r=>!r.uploaded);
   if(!pending.length){toast('Nothing to upload');return}
   const btn=document.getElementById('upload-all-btn');
@@ -780,17 +773,16 @@ async function uploadAll(){
 }
 
 async function doUpload(filename, blob){
-  const meta=JSON.stringify({name:filename});
-  const bnd='rb_'+Date.now();
-  const body=new Blob([
-    `--${bnd}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n`,
-    `--${bnd}\r\nContent-Type: image/jpeg\r\n\r\n`,
-    blob,`\r\n--${bnd}--`
-  ],{type:`multipart/related; boundary=${bnd}`});
-  const res=await timedFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+  const folder=(localStorage.getItem('gf')||'ReceiptScan').replace(/^\/+|\/+$/g,'');
+  const path='/'+folder+'/'+filename;
+  const res=await timedFetch('https://content.dropboxapi.com/2/files/upload',{
     method:'POST',
-    headers:{Authorization:'Bearer '+token,'Content-Type':`multipart/related; boundary=${bnd}`},
-    body
+    headers:{
+      'Authorization':'Bearer '+token,
+      'Content-Type':'application/octet-stream',
+      'Dropbox-API-Arg':JSON.stringify({path,mode:'add',autorename:true,mute:false})
+    },
+    body:blob
   });
   if(!res.ok){
     const txt=await res.text().catch(()=>'');
