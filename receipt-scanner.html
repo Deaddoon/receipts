@@ -124,6 +124,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .up-icon.success{background:var(--green-light);border:1px solid rgba(26,122,74,0.2)}
 .up-icon.error{background:var(--red-light);border:1px solid rgba(176,48,48,0.2)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes savepulse{0%{box-shadow:0 0 0 0 rgba(126,207,164,0.5)}60%{box-shadow:0 0 0 18px rgba(126,207,164,0)}100%{box-shadow:0 0 0 0 rgba(126,207,164,0)}}
+.save-flash{animation:savepulse 0.5s ease-out}
 .up-title{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .up-sub{font-size:14px;color:var(--text2);max-width:280px;line-height:1.5}
 .up-acts{width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px}
@@ -233,12 +235,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.5</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.7</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.7</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Added haptic-style green pulse on Save — whole screen flashes to confirm tap registered</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.6</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed receipts not uploading to Drive after v4.5<br>• Root cause: clearForm() was wiping image data before background upload could use it<br>• Now captures image blob before clearing the form</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.5</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Removed upload waiting screen entirely<br>• Receipt saves instantly to history and form clears immediately<br>• Drive upload happens silently in background — you never wait<br>• Toast notification confirms save</div>
@@ -279,7 +289,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.5</div>
+  <div class="auth-version">Version 4.7</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Google Drive — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -502,7 +512,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.5</div>
+            <div class="settings-sub">Version 4.7</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -686,6 +696,16 @@ function uploadToDrive(){
     thumb:'data:image/jpeg;base64,'+imgB64
   };
 
+  // Capture image data NOW before clearForm() wipes it
+  const uploadBlob = imgBlob || b64blob(imgB64,'image/jpeg');
+
+  // Haptic-style visual pulse on the form
+  const sb=document.getElementById('scan-screen');
+  sb.classList.remove('save-flash');
+  void sb.offsetWidth; // force reflow so animation retriggers
+  sb.classList.add('save-flash');
+  setTimeout(()=>sb.classList.remove('save-flash'),500);
+
   // Save to history and clear form immediately — don't wait for upload
   hist.unshift(entry);
   localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
@@ -693,15 +713,14 @@ function uploadToDrive(){
   toast('✓ Saved — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
   clearForm();
 
-  // Fire upload in background — user never waits
-  doUpload(filename, mainFolder).catch(()=>{});
+  // Fire upload in background with captured blob — user never waits
+  doUpload(filename, mainFolder, uploadBlob).catch(()=>{});
 }
 
-async function doUpload(filename, mainFolder){
+async function doUpload(filename, mainFolder, blob){
   folderCache={};
   const mainId=await getOrMakeFolder(mainFolder,null,mainFolder);
   const targetId=activeTrip?await getOrMakeFolder(activeTrip,mainId,mainFolder+'/'+activeTrip):mainId;
-  const blob=imgBlob||b64blob(imgB64,'image/jpeg');
   const meta=JSON.stringify({name:filename,parents:[targetId]});
   const bnd='rb_'+Date.now();
   const body=new Blob([
