@@ -239,12 +239,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.32</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.34</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.34</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Removed confusing "No trip — general folder" item from Trips tab</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.33</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Clear Log button now styled as a proper red button on the right</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.32</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• History tab is now a permanent log — never cleared when app resets<br>• Shows all receipts with date, vendor, category, trip, and amount<br>• Running total shown at top<br>• Clear button to manually wipe log when needed</div>
@@ -393,7 +401,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.32</div>
+  <div class="auth-version">Version 4.34</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -523,14 +531,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <button class="btn btn-primary btn-sm" onclick="createTrip()">Create &amp; Set Active</button>
       </div>
     </div>
-    <div class="trip-item" onclick="setActiveTrip(null)">
-      <div class="trip-dot" style="background:var(--surface2)">📁</div>
-      <div style="flex:1;min-width:0">
-        <div class="trip-item-name">No trip — general folder</div>
-        <div class="trip-item-meta" id="main-folder-meta">Saves to main Receipts folder</div>
-      </div>
-      <span id="check-none" style="display:none;color:var(--accent);font-size:18px">✓</span>
-    </div>
+
     <div class="section-lbl">Your Trips</div>
     <div id="trips-list"><div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div></div></div>
   </div>
@@ -549,7 +550,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="topbar-title">History</div>
       <div class="topbar-sub" id="hist-count">0 receipts</div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="clearAllLog()" style="color:var(--text3)">Clear</button>
+    <button onclick="clearAllLog()" style="background:var(--surface2);border:.5px solid var(--border);color:var(--red,#c0392b);font-size:13px;font-weight:600;padding:6px 14px;border-radius:8px;font-family:var(--font);cursor:pointer">Clear Log</button>
   </div>
   <div class="hist-body" id="hist-body"></div>
   <div class="tabbar">
@@ -621,7 +622,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.32</div>
+            <div class="settings-sub">Version 4.34</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -939,7 +940,6 @@ function updateBanner(){
   }
 }
 function renderTrips(){
-  document.getElementById('check-none').style.display=activeTrip?'none':'block';
   const list=document.getElementById('trips-list');
   if(!trips.length){list.innerHTML='<div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>';return}
   list.innerHTML=trips.map(t=>{
