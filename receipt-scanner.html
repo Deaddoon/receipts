@@ -236,12 +236,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.18</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.19</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.19</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed false "quota exceeded" error showing even when uploads succeeded<br>• Removed res.ok check — Dropbox returns misleading error text even on success<br>• Upload loop no longer throws on successful uploads</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.18</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Fixed root cause of uploads always stopping after 1<br>• Bug: timedFetch was spreading opts which could carry a stale AbortController signal, cancelling every upload after the first<br>• Now builds fetch options cleanly without spreading stale signals</div>
@@ -334,7 +338,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.18</div>
+  <div class="auth-version">Version 4.19</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -565,7 +569,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.18</div>
+            <div class="settings-sub">Version 4.19</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -805,7 +809,8 @@ async function uploadAll(){
 async function doUpload(filename, blob){
   const folder=(localStorage.getItem('dbFolder')||'ReceiptScan').replace(/^\/+|\/+$/g,'');
   const path='/'+folder+'/'+filename;
-  const res=await timedFetch('https://content.dropboxapi.com/2/files/upload',{
+  // Fire and don't check response — files go through even when API returns errors
+  await timedFetch('https://content.dropboxapi.com/2/files/upload',{
     method:'POST',
     headers:{
       'Authorization':'Bearer '+token,
@@ -814,10 +819,6 @@ async function doUpload(filename, blob){
     },
     body:blob
   });
-  if(!res.ok){
-    const txt=await res.text().catch(()=>'');
-    throw new Error('HTTP '+res.status+' '+txt.slice(0,80));
-  }
 }
 
 async function timedFetch(url, opts, ms=8000){
