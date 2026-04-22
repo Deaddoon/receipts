@@ -239,12 +239,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.28</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.30</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.30</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Added trip log — each receipt saved with active trip gets added to the log<br>• Trip tab shows receipt count and running total per trip<br>• Email Log button sends full trip summary to your email<br>• Clear Log button resets the log without deleting the trip</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.29</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Trip name now included in filename — e.g. 2026-04-22_Shell_Gas_NYC-Trip_$45.00.jpg</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.28</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Scan, save, upload, clear — fully automatic per receipt<br>• Each receipt uploads to Dropbox immediately on save<br>• All data cleared automatically after each upload — fresh start every time<br>• No more manual "Upload All" needed</div>
@@ -377,7 +385,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.28</div>
+  <div class="auth-version">Version 4.30</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -605,7 +613,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.28</div>
+            <div class="settings-sub">Version 4.30</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -746,7 +754,8 @@ function fname(){
   const v=(document.getElementById('f-vendor').value||'').replace(/[^a-zA-Z0-9 &]/g,'').replace(/\s+/g,'_').slice(0,30)||'Receipt';
   const d=document.getElementById('f-date').value||today();
   const a=(document.getElementById('f-amount').value||'').replace(/[^0-9.]/g,'');
-  return `${d}_${v}_${catName||'Other'}${a?'_$'+a:''}.jpg`;
+  const trip=activeTrip?'_'+activeTrip.replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'_').slice(0,20):'';
+  return `${d}_${v}_${catName||'Other'}${trip}${a?'_$'+a:''}.jpg`;
 }
 function onChange(){
   const ready=imgB64&&document.getElementById('f-vendor').value.trim()&&catName;
@@ -808,6 +817,18 @@ async function saveReceipt(){
     }
   } else {
     toast('✓ Saved locally — no Dropbox token');
+  }
+
+  // Append to trip log if active trip
+  if(activeTrip){
+    const log=JSON.parse(localStorage.getItem('triplog_'+activeTrip)||'[]');
+    log.push({
+      date:entry.date,
+      vendor:entry.vendor,
+      category:entry.category,
+      amount:entry.amount
+    });
+    localStorage.setItem('triplog_'+activeTrip, JSON.stringify(log));
   }
 
   // Clear ALL data after each receipt — fresh start every time
@@ -940,20 +961,45 @@ function renderTrips(){
   const list=document.getElementById('trips-list');
   if(!trips.length){list.innerHTML='<div class="no-trips"><div style="font-size:32px">✈️</div><div>No trips yet</div><div>Create your first trip above</div></div>';return}
   list.innerHTML=trips.map(t=>{
-    const count=hist.filter(r=>r.trip===t).length;
+    const log=JSON.parse(localStorage.getItem('triplog_'+t)||'[]');
+    const count=log.length;
+    const total=log.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
     const isActive=activeTrip===t;
     return `<div class="trip-item" onclick="setActiveTrip('${esc(t)}')">
       <div class="trip-dot ${isActive?'active':''}">${isActive?'✓':'✈️'}</div>
       <div style="flex:1;min-width:0">
         <div class="trip-item-name">${esc(t)}</div>
-        <div class="trip-item-meta">${count} receipt${count!==1?'s':''}</div>
+        <div class="trip-item-meta">${count} receipt${count!==1?'s':''}${count?' · $'+total.toFixed(2):''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-        <button class="r-email-btn" onclick="emailTrip('${esc(t)}');event.stopPropagation()">📧 Email</button>
-        <button onclick="deleteTrip('${esc(t)}',event)" style="background:none;border:none;color:var(--text3);font-size:16px;padding:4px;cursor:pointer">🗑</button>
+        <button class="r-email-btn" onclick="emailTripLog('${esc(t)}');event.stopPropagation()">📧 Email Log</button>
+        <button onclick="clearTripLog('${esc(t)}');event.stopPropagation()" style="background:none;border:none;color:var(--text3);font-size:13px;padding:4px;cursor:pointer">🗑 Log</button>
+        <button onclick="deleteTrip('${esc(t)}',event)" style="background:none;border:none;color:var(--text3);font-size:16px;padding:4px;cursor:pointer">✕</button>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Trip Log Email ────────────────────────────────────────────────────────────
+function emailTripLog(tripName){
+  const log=JSON.parse(localStorage.getItem('triplog_'+tripName)||'[]');
+  if(!log.length){toast('No receipts logged for this trip yet');return}
+  const email=localStorage.getItem('emailWork')||localStorage.getItem('emailPersonal')||'';
+  let total=0;
+  const rows=log.map(r=>{
+    const amt=parseFloat(r.amount)||0;
+    total+=amt;
+    return `${r.date}  ${r.vendor.padEnd(20)}  ${r.category.padEnd(12)}  ${r.amount?'$'+r.amount:''}`;
+  }).join('\n');
+  const body=`Trip: ${tripName}\n${'-'.repeat(50)}\n${rows}\n${'-'.repeat(50)}\nTotal: $${total.toFixed(2)}`;
+  const subject=`Receipt Log — ${tripName}`;
+  window.location.href=`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+function clearTripLog(tripName){
+  if(!confirm(`Clear log for "${tripName}"?`))return;
+  localStorage.removeItem('triplog_'+tripName);
+  renderTrips();
+  toast('Trip log cleared');
 }
 
 // ── History ────────────────────────────────────────────────────────────────────
