@@ -58,6 +58,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:var(--r);border:none;font-family:var(--font);font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;-webkit-appearance:none;width:100%}
 .btn:active{transform:scale(.97);opacity:.85}
 .btn-primary{background:var(--accent);color:#fff}
+.btn:active{transform:scale(0.96);opacity:0.85}
+.btn-primary:active{transform:scale(0.94);filter:brightness(0.88)}
+#save-btn:active{transform:scale(0.93);filter:brightness(0.85)}
 .btn-secondary{background:var(--surface);color:var(--text);border:.5px solid var(--border2);box-shadow:var(--shadow)}
 .btn-ghost{background:transparent;color:var(--text2)}
 .btn-amber{background:var(--amber-light);color:var(--amber);border:.5px solid rgba(184,118,10,0.2)}
@@ -68,7 +71,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .btn-icon{width:38px;height:38px;padding:0;border-radius:50%;flex-shrink:0;background:var(--surface);border:.5px solid var(--border2);font-size:16px;box-shadow:var(--shadow)}
 
 /* TRIP BANNER */
-.trip-banner{margin:12px 20px 0;padding:11px 14px;border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;cursor:pointer;background:var(--accent-light);border:.5px solid rgba(42,95,63,0.2)}
+.trip-banner{margin:8px 16px 0;padding:8px 12px;border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;cursor:pointer;background:var(--accent-light);border:.5px solid rgba(42,95,63,0.2)}
 .dark .trip-banner{border-color:rgba(74,159,111,0.25)}
 .trip-banner.no-trip{background:var(--surface2);border-color:var(--border2)}
 .trip-name{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -76,12 +79,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .trip-label{font-size:11px;color:var(--text3);margin-top:1px}
 
 /* SCAN */
-.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 20px 0;gap:12px;overflow-y:auto}
-.photo-zone{width:100%;max-width:380px;aspect-ratio:4/3;border-radius:16px;border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;background:var(--surface2);cursor:pointer;flex-shrink:0}
+.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 16px 0;gap:8px;overflow-y:auto}
+.photo-zone{width:100%;max-width:380px;aspect-ratio:5/3;border-radius:16px;border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;background:var(--surface2);cursor:pointer;flex-shrink:0}
 .photo-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px}
-.photo-ph{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-.photo-icon{width:56px;height:56px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:var(--shadow)}
-.photo-label{font-size:14px;color:var(--text2);font-weight:500}
+.photo-ph{display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
+.photo-icon{width:44px;height:44px;background:var(--surface);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--shadow)}
+.photo-label{font-size:13px;color:var(--text2);font-weight:500}
 .photo-sub{font-size:12px;color:var(--text3)}
 .corner{position:absolute;width:20px;height:20px;border-color:var(--accent);border-style:solid;opacity:.5}
 .c-tl{top:12px;left:12px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
@@ -91,20 +94,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* FORM */
 .entry-form{width:100%;max-width:380px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.form-row{display:flex;align-items:center;padding:12px 14px;border-bottom:.5px solid var(--border);gap:10px}
+.form-row{display:flex;align-items:center;padding:9px 12px;border-bottom:.5px solid var(--border);gap:10px}
 .form-row:last-child{border-bottom:none}
 .form-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;width:66px;flex-shrink:0}
 .form-input{background:transparent;border:none;font-family:var(--font);font-size:15px;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
 .form-input::placeholder{color:var(--text3)}
 .cat-wrap{display:flex;flex-wrap:wrap;gap:6px}
-.cat-pill{padding:5px 12px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
+.cat-pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);-webkit-appearance:none;transition:all .12s}
 .cat-pill.s-dining{background:var(--dining-bg);color:var(--dining-c);border-color:var(--dining-c)}
 .cat-pill.s-travel{background:var(--travel-bg);color:var(--travel-c);border-color:var(--travel-c)}
 .cat-pill.s-gas{background:var(--gas-bg);color:var(--gas-c);border-color:var(--gas-c)}
 .cat-pill.s-parking{background:var(--parking-bg);color:var(--parking-c);border-color:var(--parking-c)}
 .cat-pill.s-other{background:var(--other-bg);color:var(--other-c);border-color:var(--other-c)}
 .fname-bar{padding:9px 12px;background:var(--accent-light);border-radius:var(--rs);font-size:11px;color:var(--accent);font-family:'SF Mono','Menlo',monospace;word-break:break-all;display:none;width:100%;max-width:380px}
-.scan-footer{padding:12px 20px max(env(safe-area-inset-bottom),24px);display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--surface);border-top:.5px solid var(--border)}
+.scan-footer{padding:8px 16px max(env(safe-area-inset-bottom),16px);display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--surface);border-top:.5px solid var(--border)}
 
 /* AUTH */
 #auth-screen{align-items:center;justify-content:center;padding:40px 20px;gap:20px;text-align:center}
@@ -165,13 +168,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* SETTINGS */
 #settings-screen{background:var(--bg)}
-.settings-body{flex:1;overflow-y:auto;padding:12px 20px 20px;display:flex;flex-direction:column;gap:16px}
-.settings-section-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.settings-body{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.settings-section-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .settings-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.settings-row{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px}
+.settings-row{display:flex;align-items:center;padding:9px 14px;border-bottom:.5px solid var(--border);gap:10px}
 .settings-row:last-child{border-bottom:none}
-.settings-label{font-size:15px;flex:1}
-.settings-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.settings-label{font-size:14px;flex:1}
+.settings-sub{font-size:11px;color:var(--text2);margin-top:1px}
 .settings-input{background:transparent;border:none;font-family:var(--font);font-size:14px;color:var(--text);outline:none;-webkit-appearance:none;text-align:right;min-width:0;flex:1}
 .settings-input::placeholder{color:var(--text3);text-align:right}
 .toggle{width:44px;height:26px;border-radius:13px;background:var(--surface3);border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background 0.2s;-webkit-appearance:none}
@@ -236,12 +239,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.19</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.24</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.24</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Save button now visually presses down on tap<br>• Button briefly shows ✓ Saved! after tapping so you know it worked<br>• All buttons have press-down active states</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.23</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Removed Camera button — tap the photo box to open camera<br>• Library button kept for picking existing photos</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.22</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Tapping the main photo box now opens camera directly</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.21</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Tightened main scan screen to fit on iPhone without scrolling<br>• Smaller photo zone, tighter form rows, smaller category pills<br>• Reduced gaps and padding throughout</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.20</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Tightened Settings screen to fit on iPhone without scrolling<br>• Reduced padding, row height, font sizes, and section gaps<br>• Removed redundant sub-labels</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.19</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Fixed false "quota exceeded" error showing even when uploads succeeded<br>• Removed res.ok check — Dropbox returns misleading error text even on success<br>• Upload loop no longer throws on successful uploads</div>
@@ -338,7 +361,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.19</div>
+  <div class="auth-version">Version 4.24</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -378,19 +401,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
 
   <div class="scan-body">
-    <div class="photo-zone" id="photo-zone" onclick="triggerLibrary()">
+    <div class="photo-zone" id="photo-zone" onclick="triggerCamera()">
       <div class="corner c-tl"></div>
       <div class="corner c-br"></div>
       <div class="photo-ph" id="photo-ph">
         <div class="photo-icon">🖼</div>
-        <div class="photo-label">Tap to pick from Library</div>
+        <div class="photo-label">Tap to take a photo</div>
         <div class="photo-sub">Or use buttons below</div>
       </div>
     </div>
 
     <div class="photo-btns">
-      <button class="btn btn-secondary btn-sm" onclick="triggerCamera()">📷 Camera</button>
-      <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Library</button>
+      <button class="btn btn-secondary btn-sm" onclick="triggerLibrary()">🖼 Pick from Library</button>
     </div>
 
     <div class="entry-form">
@@ -406,7 +428,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span class="form-label">Amount</span>
         <input class="form-input" type="text" id="f-amount" placeholder="$0.00" inputmode="decimal" oninput="onChange()">
       </div>
-      <div class="form-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="form-row" style="flex-direction:column;align-items:flex-start;gap:5px">
         <span class="form-label">Category</span>
         <div class="cat-wrap">
           <button class="cat-pill" data-cat="Dining"  onclick="pickCat(this)">🍽 Dining</button>
@@ -419,7 +441,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     </div>
 
     <div class="fname-bar" id="fname-bar"></div>
-    <div style="height:8px;flex-shrink:0"></div>
+    
   </div>
 
   <div class="scan-footer">
@@ -518,14 +540,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row">
           <div style="flex:1">
             <div class="settings-label">Access Token</div>
-            <div class="settings-sub">Your Dropbox access token</div>
           </div>
           <input class="settings-input" type="password" id="s-dropbox-token" placeholder="Paste Dropbox access token here" autocorrect="off" autocomplete="off" spellcheck="false">
         </div>
         <div class="settings-row">
           <div style="flex:1">
             <div class="settings-label">Clear Token</div>
-            <div class="settings-sub">Remove saved Dropbox token</div>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="clearToken()" style="color:var(--red)">Clear</button>
         </div>
@@ -569,7 +589,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.19</div>
+            <div class="settings-sub">Version 4.24</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -758,6 +778,12 @@ function saveReceipt(){
   void sb.offsetWidth;
   sb.classList.add('save-flash');
   setTimeout(()=>sb.classList.remove('save-flash'),500);
+
+  // Flash save button to confirm tap
+  const btn=document.getElementById('save-btn');
+  btn.textContent='✓ Saved!';
+  btn.style.background='var(--green,#2a5f3f)';
+  setTimeout(()=>{btn.textContent='Save Receipt';btn.style.background='';},900);
 
   toast('✓ Saved — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
   clearForm();
