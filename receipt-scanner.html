@@ -239,12 +239,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.30</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.32</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.32</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• History tab is now a permanent log — never cleared when app resets<br>• Shows all receipts with date, vendor, category, trip, and amount<br>• Running total shown at top<br>• Clear button to manually wipe log when needed</div>
+      </div>
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.31</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Trip banner now just says "No Trip" when no trip is active</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.30</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Added trip log — each receipt saved with active trip gets added to the log<br>• Trip tab shows receipt count and running total per trip<br>• Email Log button sends full trip summary to your email<br>• Clear Log button resets the log without deleting the trip</div>
@@ -385,7 +393,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.30</div>
+  <div class="auth-version">Version 4.32</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -417,8 +425,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div style="display:flex;align-items:center;gap:8px;min-width:0">
       <span style="font-size:16px;flex-shrink:0">✈️</span>
       <div style="min-width:0">
-        <div class="trip-name none" id="banner-name">No active trip</div>
-        <div class="trip-label" id="banner-label">Tap to select or create a trip</div>
+        <div class="trip-name none" id="banner-name">No Trip</div>
+        <div class="trip-label" id="banner-label"></div>
       </div>
     </div>
     <span style="font-size:12px;color:var(--text3);flex-shrink:0">Change →</span>
@@ -541,7 +549,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="topbar-title">History</div>
       <div class="topbar-sub" id="hist-count">0 receipts</div>
     </div>
-    <button class="btn btn-primary btn-sm" id="upload-all-btn" onclick="uploadAll()" style="display:none">☁️ Upload to Dropbox</button>
+    <button class="btn btn-ghost btn-sm" onclick="clearAllLog()" style="color:var(--text3)">Clear</button>
   </div>
   <div class="hist-body" id="hist-body"></div>
   <div class="tabbar">
@@ -613,7 +621,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.30</div>
+            <div class="settings-sub">Version 4.32</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -819,6 +827,17 @@ async function saveReceipt(){
     toast('✓ Saved locally — no Dropbox token');
   }
 
+  // Append to permanent receipt log (never cleared)
+  const allLog=JSON.parse(localStorage.getItem('alllog')||'[]');
+  allLog.unshift({
+    date:entry.date,
+    vendor:entry.vendor,
+    category:entry.category,
+    amount:entry.amount,
+    trip:entry.trip||''
+  });
+  localStorage.setItem('alllog',JSON.stringify(allLog.slice(0,500)));
+
   // Append to trip log if active trip
   if(activeTrip){
     const log=JSON.parse(localStorage.getItem('triplog_'+activeTrip)||'[]');
@@ -841,50 +860,13 @@ async function saveReceipt(){
   btn.textContent='Save Receipt';
 }
 
-// ── Upload All to Dropbox ──────────────────────────────────────────────────────
-function updateUploadBtn(){
-  const pending=hist.filter(r=>!r.uploaded).length;
-  const btn=document.getElementById('upload-all-btn');
-  if(!btn)return;
-  if(pending>0){
-    btn.style.display='block';
-    btn.textContent='☁️ Upload '+pending+' to Dropbox';
-    btn.disabled=false;
-  } else {
-    btn.style.display='none';
-  }
-}
+function updateUploadBtn(){} // no-op — kept for safety
 
-async function uploadAll(){
-  token=localStorage.getItem('dbToken')||'';
-  if(!token){toast('No Dropbox token — add it in Settings');openSettings();return}
-  const pending=hist.filter(r=>!r.uploaded);
-  if(!pending.length){toast('Nothing to upload');return}
-  const btn=document.getElementById('upload-all-btn');
-  btn.disabled=true;
-  btn.textContent='☁️ Uploading…';
-  let done=0;
-  for(const entry of pending){
-    try{
-      const b64=localStorage.getItem('blob_'+entry.id);
-      if(!b64){entry.uploaded=true;done++;continue;} // skip if blob missing
-      const blob=b64blob(b64,'image/jpeg');
-      await doUpload(entry.filename, blob);
-      entry.uploaded=true;
-      localStorage.removeItem('blob_'+entry.id); // free up space after upload
-      done++;
-      btn.textContent='☁️ Uploaded '+done+'/'+pending.length+'…';
-      localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
-      // Small delay between uploads to avoid Dropbox rate limiting
-      if(done < pending.length) await new Promise(r=>setTimeout(r,1500));
-    }catch(e){
-      toast('Stopped after '+done+': '+(e.message||'unknown error'));
-      updateUploadBtn();
-      return;
-    }
-  }
-  toast('✓ All '+done+' receipts uploaded to Dropbox!');
-  updateUploadBtn();
+function clearAllLog(){
+  if(!confirm('Clear all receipt history? This cannot be undone.'))return;
+  localStorage.removeItem('alllog');
+  renderHistory();
+  toast('History cleared');
 }
 
 async function doUpload(filename, blob){
@@ -952,8 +934,8 @@ function updateBanner(){
     labelEl.textContent=count+' receipt'+(count!==1?'s':'')+' in this trip';
   }else{
     banner.classList.add('no-trip');
-    nameEl.className='trip-name none';nameEl.textContent='No active trip';
-    labelEl.textContent='Tap to select or create a trip';
+    nameEl.className='trip-name none';nameEl.textContent='No Trip';
+    labelEl.textContent='';
   }
 }
 function renderTrips(){
@@ -1004,33 +986,23 @@ function clearTripLog(tripName){
 
 // ── History ────────────────────────────────────────────────────────────────────
 function renderHistory(){
-  document.getElementById('hist-count').textContent=hist.length+' receipt'+(hist.length!==1?'s':'');
+  const log=JSON.parse(localStorage.getItem('alllog')||'[]');
+  document.getElementById('hist-count').textContent=log.length+' receipt'+(log.length!==1?'s':'');
   const b=document.getElementById('hist-body');
-  if(!hist.length){b.innerHTML='<div class="hist-empty"><div style="font-size:40px">🧾</div><div style="font-size:16px;font-weight:500">No receipts yet</div><div>Scan your first receipt to get started</div></div>';return}
-  let tripBtn='';
-  if(activeTrip){
-    const count=hist.filter(r=>r.trip===activeTrip).length;
-    tripBtn=`<button class="email-trip-btn" onclick="emailTrip('${esc(activeTrip)}')">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:20px">📧</span>
-        <div style="text-align:left">
-          <div style="font-size:14px;font-weight:600;color:var(--amber)">Complete Trip &amp; Email Receipts</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:1px">${esc(activeTrip)} · ${count} receipt${count!==1?'s':''}</div>
-        </div>
-      </div>
-      <span style="color:var(--text3)">→</span>
-    </button>`;
-  }
-  b.innerHTML=tripBtn+hist.map(r=>`
+  if(!log.length){b.innerHTML='<div class="hist-empty"><div style="font-size:40px">🧾</div><div style="font-size:16px;font-weight:500">No receipts yet</div><div>Scan your first receipt to get started</div></div>';return}
+  const total=log.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const header=`<div style="padding:10px 14px;font-size:12px;color:var(--text3);display:flex;justify-content:space-between;align-items:center">
+    <span>${log.length} receipts</span>
+    <span>Total: $${total.toFixed(2)}</span>
+  </div>`;
+  b.innerHTML=header+log.map(r=>`
     <div class="r-item">
-      <div class="r-thumb">${r.thumb?'<img src="'+r.thumb+'" loading="lazy">':''}</div>
       <div class="r-info">
-        <div class="r-vendor">${r.vendor}</div>
-        <div class="r-meta">${r.date} · ${r.category}${r.trip?' · ✈️ '+r.trip:''}</div>
+        <div class="r-vendor">${esc(r.vendor)}</div>
+        <div class="r-meta">${r.date} · ${r.category}${r.trip?' · ✈️ '+esc(r.trip):''}</div>
       </div>
       <div class="r-right">
-        <div class="r-amt">${r.amount||'—'}</div>
-        <button class="r-email-btn" onclick="emailSingle(${r.id})">📧 Email</button>
+        <div class="r-amt">${r.amount?'$'+r.amount:'—'}</div>
       </div>
     </div>`).join('');
 }
