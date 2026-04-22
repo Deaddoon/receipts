@@ -236,12 +236,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.16</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.17</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.17</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed "no token" error when token was saved after page load<br>• Token now read fresh from storage on every upload attempt<br>• Token also updated in memory immediately when Settings are saved<br>• Added Clear Token button in Settings</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.16</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Removed all Google references — app now fully Dropbox-based<br>• Added 1.5s delay between uploads to prevent Dropbox rate limiting<br>• Folder setting now defaults to ReceiptScan</div>
@@ -326,7 +330,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.16</div>
+  <div class="auth-version">Version 4.17</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -512,6 +516,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         </div>
         <div class="settings-row">
           <div style="flex:1">
+            <div class="settings-label">Clear Token</div>
+            <div class="settings-sub">Remove saved Dropbox token</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="clearToken()" style="color:var(--red)">Clear</button>
+        </div>
+        <div class="settings-row">
+          <div style="flex:1">
             <div class="settings-label">Folder Name</div>
             <div class="settings-sub">Folder in your Dropbox</div>
           </div>
@@ -550,7 +561,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.16</div>
+            <div class="settings-sub">Version 4.17</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -605,10 +616,18 @@ function saveSettings(){
   localStorage.setItem('dbFolder',document.getElementById('s-folder').value.trim()||'ReceiptScan');
   localStorage.setItem('emailWork',document.getElementById('s-email-work').value.trim());
   localStorage.setItem('emailPersonal',document.getElementById('s-email-personal').value.trim());
+  token=localStorage.getItem('dbToken')||'';
   updateFolderLabel();
   toast('Settings saved');
 }
 function openSettings(){ showTab('settings') }
+function clearToken(){
+  if(!confirm('Remove Dropbox token? You will need to paste it again to upload.'))return;
+  localStorage.removeItem('dbToken');
+  token=null;
+  document.getElementById('s-dropbox-token').value='';
+  toast('Token cleared');
+}
 function toggleDark(){
   darkMode=!darkMode;
   document.body.classList.toggle('dark',darkMode);
@@ -751,6 +770,7 @@ function updateUploadBtn(){
 }
 
 async function uploadAll(){
+  token=localStorage.getItem('dbToken')||'';
   if(!token){toast('No Dropbox token — add it in Settings');openSettings();return}
   const pending=hist.filter(r=>!r.uploaded);
   if(!pending.length){toast('Nothing to upload');return}
