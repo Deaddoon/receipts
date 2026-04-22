@@ -127,7 +127,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .up-icon.success{background:var(--green-light);border:1px solid rgba(26,122,74,0.2)}
 .up-icon.error{background:var(--red-light);border:1px solid rgba(176,48,48,0.2)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes savepulse{0%{box-shadow:0 0 0 0 rgba(126,207,164,0.5)}60%{box-shadow:0 0 0 18px rgba(126,207,164,0)}100%{box-shadow:0 0 0 0 rgba(126,207,164,0)}}
+@keyframes savepulse{0%{background:var(--bg)}40%{background:rgba(126,207,164,0.25)}100%{background:var(--bg)}}
 .save-flash{animation:savepulse 0.5s ease-out}
 .up-title{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .up-sub{font-size:14px;color:var(--text2);max-width:280px;line-height:1.5}
@@ -209,7 +209,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tab svg{width:20px;height:20px}
 
 /* TOAST */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200;font-family:var(--font)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:13px 24px;border-radius:20px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:200;font-family:var(--font)}
 .toast.show{opacity:1}
 #fi-camera,#fi-library{display:none}
 </style>
@@ -239,12 +239,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.24</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.25</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.25</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed save button not responding after first save<br>• Root cause: button flash was fighting clearForm's disabled state<br>• Removed button flash — screen pulse and larger toast confirm the save instead</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.24</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Save button now visually presses down on tap<br>• Button briefly shows ✓ Saved! after tapping so you know it worked<br>• All buttons have press-down active states</div>
@@ -361,7 +365,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.24</div>
+  <div class="auth-version">Version 4.25</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -589,7 +593,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.24</div>
+            <div class="settings-sub">Version 4.25</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -778,12 +782,6 @@ function saveReceipt(){
   void sb.offsetWidth;
   sb.classList.add('save-flash');
   setTimeout(()=>sb.classList.remove('save-flash'),500);
-
-  // Flash save button to confirm tap
-  const btn=document.getElementById('save-btn');
-  btn.textContent='✓ Saved!';
-  btn.style.background='var(--green,#2a5f3f)';
-  setTimeout(()=>{btn.textContent='Save Receipt';btn.style.background='';},900);
 
   toast('✓ Saved — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
   clearForm();
