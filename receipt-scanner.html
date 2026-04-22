@@ -239,12 +239,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.25</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.26</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.26</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Fixed receipts not uploading to Dropbox<br>• Root cause: storing blobs inside history was hitting localStorage size limit<br>• Blobs now stored separately per entry and cleaned up after upload</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.25</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Fixed save button not responding after first save<br>• Root cause: button flash was fighting clearForm's disabled state<br>• Removed button flash — screen pulse and larger toast confirm the save instead</div>
@@ -365,7 +369,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.25</div>
+  <div class="auth-version">Version 4.26</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -593,7 +597,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.25</div>
+            <div class="settings-sub">Version 4.26</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -758,8 +762,9 @@ function scanAnother(){clearForm();showTab('scan')}
 // ── Save locally ───────────────────────────────────────────────────────────────
 function saveReceipt(){
   const filename=fname();
+  const entryId=Date.now();
   const entry={
-    id:Date.now(),
+    id:entryId,
     vendor:document.getElementById('f-vendor').value||'Unknown',
     date:document.getElementById('f-date').value||today(),
     amount:document.getElementById('f-amount').value||'',
@@ -767,9 +772,11 @@ function saveReceipt(){
     trip:activeTrip||null,
     filename,
     thumb:'data:image/jpeg;base64,'+imgB64,
-    blob:imgB64,  // store for later upload
     uploaded:false
   };
+
+  // Store blob separately — keeps history object small enough for localStorage
+  try{ localStorage.setItem('blob_'+entryId, imgB64); }catch(e){}
 
   hist.unshift(entry);
   localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
@@ -812,9 +819,12 @@ async function uploadAll(){
   let done=0;
   for(const entry of pending){
     try{
-      const blob=b64blob(entry.blob,'image/jpeg');
+      const b64=localStorage.getItem('blob_'+entry.id);
+      if(!b64){entry.uploaded=true;done++;continue;} // skip if blob missing
+      const blob=b64blob(b64,'image/jpeg');
       await doUpload(entry.filename, blob);
       entry.uploaded=true;
+      localStorage.removeItem('blob_'+entry.id); // free up space after upload
       done++;
       btn.textContent='☁️ Uploaded '+done+'/'+pending.length+'…';
       localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
