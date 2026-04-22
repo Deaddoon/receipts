@@ -239,12 +239,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <span style="font-size:26px">🧾</span>
         <div>
           <div style="font-size:16px;font-weight:700">ReceiptScan</div>
-          <div style="font-size:11px;color:var(--text3)">Version 4.27</div>
+          <div style="font-size:11px;color:var(--text3)">Version 4.28</div>
         </div>
       </div>
       <button onclick="hideAbout()" style="background:var(--surface2);border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;color:var(--text2)">✕</button>
     </div>
     <div class="v-list">
+      <div class="v-row">
+        <div class="v-header"><span class="v-num">v4.28</span><span class="v-date">April 2026</span></div>
+        <div class="v-notes">• Scan, save, upload, clear — fully automatic per receipt<br>• Each receipt uploads to Dropbox immediately on save<br>• All data cleared automatically after each upload — fresh start every time<br>• No more manual "Upload All" needed</div>
+      </div>
       <div class="v-row">
         <div class="v-header"><span class="v-num">v4.27</span><span class="v-date">April 2026</span></div>
         <div class="v-notes">• Restored proper error checking on Dropbox upload<br>• Now verifies file actually landed in Dropbox by checking response<br>• Toast shows exact error if upload fails silently</div>
@@ -373,7 +377,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="screen" id="auth-screen">
   <div class="auth-logo">🧾</div>
   <div class="auth-title">ReceiptScan</div>
-  <div class="auth-version">Version 4.27</div>
+  <div class="auth-version">Version 4.28</div>
   <div class="auth-sub">Photograph receipts, fill in the details, and save straight to your Dropbox — organized by trip.</div>
   <div class="perm-card">
     <div class="perm-row"><span style="font-size:18px">📷</span> Take or pick receipt photos</div>
@@ -601,7 +605,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="settings-row" style="cursor:pointer" onclick="showAbout()">
           <div style="flex:1">
             <div class="settings-label">About</div>
-            <div class="settings-sub">Version 4.27</div>
+            <div class="settings-sub">Version 4.28</div>
           </div>
           <span style="color:var(--text3)">→</span>
         </div>
@@ -763,12 +767,12 @@ function clearForm(){
 }
 function scanAnother(){clearForm();showTab('scan')}
 
-// ── Save locally ───────────────────────────────────────────────────────────────
-function saveReceipt(){
+// ── Save & Upload ──────────────────────────────────────────────────────────────
+async function saveReceipt(){
   const filename=fname();
-  const entryId=Date.now();
+  const capturedBlob=b64blob(imgB64,'image/jpeg'); // capture before clearForm
   const entry={
-    id:entryId,
+    id:Date.now(),
     vendor:document.getElementById('f-vendor').value||'Unknown',
     date:document.getElementById('f-date').value||today(),
     amount:document.getElementById('f-amount').value||'',
@@ -779,14 +783,6 @@ function saveReceipt(){
     uploaded:false
   };
 
-  // Store blob separately — keeps history object small enough for localStorage
-  try{ localStorage.setItem('blob_'+entryId, imgB64); }catch(e){}
-
-  hist.unshift(entry);
-  localStorage.setItem('rh4',JSON.stringify(hist.slice(0,200)));
-  updateBanner();
-  updateUploadBtn();
-
   // Haptic-style visual pulse
   const sb=document.getElementById('scan-screen');
   sb.classList.remove('save-flash');
@@ -794,8 +790,34 @@ function saveReceipt(){
   sb.classList.add('save-flash');
   setTimeout(()=>sb.classList.remove('save-flash'),500);
 
-  toast('✓ Saved — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
+  // Clear form immediately so user can't double-tap
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true;
+  btn.textContent='Uploading…';
   clearForm();
+
+  // Upload to Dropbox
+  token=localStorage.getItem('dbToken')||'';
+  if(token){
+    try{
+      await doUpload(filename, capturedBlob);
+      entry.uploaded=true;
+      toast('✓ Uploaded — '+entry.vendor+(entry.amount?' · '+entry.amount:''));
+    }catch(e){
+      toast('Saved locally — upload failed: '+(e.message||'').slice(0,60));
+    }
+  } else {
+    toast('✓ Saved locally — no Dropbox token');
+  }
+
+  // Clear ALL data after each receipt — fresh start every time
+  hist=[];
+  localStorage.removeItem('rh4');
+  // Clean up any blob keys
+  Object.keys(localStorage).filter(k=>k.startsWith('blob_')).forEach(k=>localStorage.removeItem(k));
+  updateBanner();
+  updateUploadBtn();
+  btn.textContent='Save Receipt';
 }
 
 // ── Upload All to Dropbox ──────────────────────────────────────────────────────
